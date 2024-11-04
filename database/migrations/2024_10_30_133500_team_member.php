@@ -1,6 +1,7 @@
 <?php
 
 use App\Models\Member;
+use App\Models\Team;
 use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Schema;
@@ -12,10 +13,13 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('teams', function (Blueprint $table) {
+        Schema::create('anggota_teams', function (Blueprint $table) {
             $table->id();
-            $table->string('nama_tim');
+            $table->enum('role', ['pm', 'fe', 'be', 'ui_ux']);
+            $table->foreignIdFor(Team::class);
+            $table->foreignIdFor(Member::class);
             $table->timestamps();
+
         });
     }
 
@@ -24,6 +28,6 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::dropIfExists('teams');
+        //
     }
 };

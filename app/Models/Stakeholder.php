@@ -8,4 +8,8 @@ use Illuminate\Database\Eloquent\Model;
 class Stakeholder extends Model
 {
     use HasFactory;
+    protected $guarded = [];
+    public function projects(){
+        return $this->hasMany(Project::class)->get();
+    }
 }

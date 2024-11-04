@@ -5,17 +5,12 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 
-class Team extends Model
+class Anggota extends Model
 {
-    protected $guarded =[];
+    protected $table = "anggotas";
+    protected $guarded=[];
     use HasFactory;
-
-    public function project(){
-        return $this->hasMany(Project::class)->get();
-    }
-
     public function team_member(){
         return $this->hasMany(Anggota_team::class)->get();
     }
-
 }

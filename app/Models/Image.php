@@ -7,5 +7,9 @@ use Illuminate\Database\Eloquent\Model;
 
 class Image extends Model
 {
+    protected $guarded=[];
     use HasFactory;
+    public function project(){
+        return $this->belongsTo(Project::class)->first();
+    }
 }
