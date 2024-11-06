@@ -5,7 +5,9 @@ namespace Database\Seeders;
 // use Illuminate\Database\Console\Seeds\WithoutModelEvents;
 
 use App\Models\Category;
+use App\Models\Comment;
 use App\Models\Image;
+use App\Models\Like;
 use App\Models\Member;
 use App\Models\Project;
 use App\Models\ProjectCategory;
@@ -258,7 +260,67 @@ class DatabaseSeeder extends Seeder
         ['project_id' => 5, 'link_gambar' => 'https://tse1.mm.bing.net/th?id=OIP.YCjPRaOLipkncsvEibKS6QHaD4&pid=Api&P=0&h=220'],
     ];
 
+    private $comment = [
+        [
+            'user_id' => 1,
+            'project_id' => 1,
+            'isi_komen' => 'mantap.',
+        ],
+        [
+            'user_id' => 2,
+            'project_id' => 1,
+            'isi_komen' => 'bagus.',
+        ],
+        [
+            'user_id' => 3,
+            'project_id' => 2,
+            'isi_komen' => 'warnanya pas.',
+        ],
+        [
+            'user_id' => 1,
+            'project_id' => 2,
+            'isi_komen' => 'fiturnya oke.',
+        ],
+        [
+            'user_id' => 4,
+            'project_id' => 3,
+            'isi_komen' => 'ui nya keren.',
+        ],
+        [
+            'user_id' => 5,
+            'project_id' => 3,
+            'isi_komen' => 'josss.',
+        ],
+        // Tambahkan data komentar lainnya sesuai kebutuhan
 
+    ];
+    private $like = [
+        [
+            'user_id' => 1,
+            'project_id' => 1,
+        ],
+        [
+            'user_id' => 2,
+            'project_id' => 1,
+        ],
+        [
+            'user_id' => 3,
+            'project_id' => 2,
+        ],
+        [
+            'user_id' => 1,
+            'project_id' => 2,
+        ],
+        [
+            'user_id' => 4,
+            'project_id' => 3,
+        ],
+        [
+            'user_id' => 5,
+            'project_id' => 3,
+        ],
+
+    ];
     public function run(): void
     {
         foreach ($this->anggotaTeam as $key => $value) {
@@ -291,6 +353,12 @@ class DatabaseSeeder extends Seeder
         }
         foreach ($this->images as $key=>$value) {
             Image::create($value);
+        }
+        foreach ($this->comment as $key=>$value) {
+            Comment::create($value);
+        }
+        foreach ($this->like as $key=>$value) {
+            Like::create($value);
         }
 
 

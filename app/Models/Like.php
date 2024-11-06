@@ -13,4 +13,8 @@ class Like extends Model
     public function project(){
         return $this->belongsTo(Project::class)->first();
     }
+
+    public function User(){
+        return $this->belongsTo(User::class)->first();
+    }
 }
