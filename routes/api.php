@@ -22,3 +22,12 @@ Route::middleware('auth:sanctum')->get('/user', function (Request $request) {
 
 Route::post('register',[LoginController::class,'register']);
 Route::post('login',[LoginController::class,'login']);
+
+use App\Http\Controllers\ProjectController;
+
+// Route API untuk filter proyek
+Route::get('/projects/filter', [ProjectController::class, 'filterProjects'])->name('api.projects.filter');
+
+// Route API untuk pencarian proyek
+Route::get('/projects/search', [ProjectController::class, 'searchProjects'])->name('api.projects.search');
+

@@ -7,9 +7,11 @@ use Illuminate\Database\Eloquent\Model;
 
 class Member extends Model
 {
+    use HasFactory;
+    protected $table = "anggotas";
     protected $guarded=[];
     use HasFactory;
-    public function team(){
-        return $this->belongsToMany(Team::class)->first();
+    public function team_member(){
+        return $this->hasMany(Team_member::class)->get();
     }
 }

@@ -15,7 +15,7 @@ class Team extends Model
     }
 
     public function team_member(){
-        return $this->hasMany(Anggota_team::class)->get();
+        return $this->hasMany(Team_member::class)->get();
     }
 
 }
