@@ -45,35 +45,21 @@ class ProjectController extends Controller
         ]);
     }
 
-    public function view_project(){
+    public function view_project($id)
+    {
         //controller ini dapat menampilkan projectnya(gambar), kemudian didalamnya ada: jumlah like, isi comment,deskripsi,nama proyek, Category, Tahun, nama stakeholder, nama tim, dan nama member timnya
         // stakeholder bisa dipencet terdirect ke Detailstakeholder dan didalam nya
         // team bisa dipencet terdirect ke Detailteam dan didalam nya ada nama nama membernya
         // nama membernya bisa dipencet lalu mengarahkan ke DetailMember
-    }
 
 
-
-    public function DetailStakeholder(){
-        //jika stakeholder dipencet dapat melihat detail stakeholdernya
-        // di stakeholder dapat melihat list project yang dimiliki stakeholder tersebut dan bila dipencet langsung terdirect ke projectnya
-    }
-
-    public function DetailTeam(){
-        // jika team dipencet maka akan muncul nama nama membernya
-    }
-
-    public function DetailMember(){
-        // jika member dipencet dapat melihat detail membernya memiliki proyek apa saja
-    }
-
-
-    public function view_project2($id)
-    {
         // Ambil proyek berdasarkan ID tanpa eager loading di model
         $project = Project::findOrFail($id);
 
         // Ambil relasi secara manual tanpa menggunakan eager loading
+
+
+        
         $data = [
             'project' => $project,
             'images' => $project->image(),
@@ -101,8 +87,16 @@ class ProjectController extends Controller
         ]);
     }
 
-    public function DetailStakeholder2($id)
+
+
+    public function DetailStakeholder($id)
     {
+
+
+        //jika stakeholder dipencet dapat melihat detail stakeholdernya
+        // di stakeholder dapat melihat list project yang dimiliki stakeholder tersebut dan bila dipencet langsung terdirect ke projectnya
+
+
         // Ambil detail stakeholder berdasarkan ID tanpa eager loading di model
         $stakeholder = Stakeholder::findOrFail($id);
 
@@ -123,13 +117,21 @@ class ProjectController extends Controller
         ]);
     }
 
-    public function DetailTeam2($id)
+
+    public function DetailTeam($id)
     {
+
+
+        // jika team dipencet maka akan muncul nama nama membernya//
+
+
+
         // Ambil detail tim berdasarkan ID tanpa eager loading di model
         $team = Team::findOrFail($id);
 
         // Ambil anggota terkait dengan tim
-        $members = $team->members()->get();
+        $members = $team->team_member()->get();
+
 
         return response()->json([
             'status' => 'success',
@@ -140,27 +142,46 @@ class ProjectController extends Controller
         ]);
     }
 
-    public function DetailMember2($id)
+    public function DetailMember($id)
     {
-        // Ambil detail anggota berdasarkan ID tanpa eager loading di model
+
+
+        // jika member dipencet dapat melihat detail membernya memiliki proyek apa saja
+
+
+        // Ambil detail anggota berdasarkan ID
         $member = Member::findOrFail($id);
 
-        // Ambil proyek terkait dengan anggota
-        $projects = $member->projects()->get();
+        // Ambil proyek yang dimiliki oleh anggota
+        $projects = $member->projects;  // Mengambil proyek melalui relasi hasManyThrough
 
         return response()->json([
             'status' => 'success',
             'data' => [
-                'member' => $member,
+                'member' => [
+                    'id' => $member->id,
+                    'nama_lengkap' => $member->nama_lengkap,
+                    'NIM' => $member->NIM,
+                    'foto' => $member->foto,
+                ],
                 'projects' => $projects->map(function ($project) {
                     return [
                         'id' => $project->id,
                         'name' => $project->name,
+                        'description' => $project->description, // Menambahkan deskripsi proyek
+                        // Tambahkan data lain sesuai yang dibutuhkan
                     ];
                 }),
             ],
         ]);
-    }
+}
+
+
+
+
+
+
+
 
     //HAPUSSSSS ANGKA 2
 

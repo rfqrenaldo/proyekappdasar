@@ -14,4 +14,9 @@ class Member extends Model
     public function team_member(){
         return $this->hasMany(Team_member::class)->get();
     }
+
+    public function projects()
+    {
+        return $this->hasManyThrough(Project::class, Team_member::class); // Menghubungkan Member ke Project lewat Team_member
+    }
 }
