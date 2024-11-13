@@ -12,10 +12,10 @@ class ProjectCategory extends Model
     protected $guarded = [];
 
     public function projects(){
-        return $this->belongsToMany(Project::class)->first();
+        return $this->belongsToMany(Project::class);
     }
     public function category(){
-        return$this->belongsToMany(Category::class)->first();
+        return$this->belongsToMany(Category::class);
     }
 
 }

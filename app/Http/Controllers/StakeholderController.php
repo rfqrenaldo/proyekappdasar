@@ -11,7 +11,7 @@ class StakeholderController extends Controller
     public function view_NavStakeholder()
     {
         // Ambil semua stakeholder
-        $stakeholders = Stakeholder::all();
+        $stakeholders = Stakeholder::with(['projects'])->get();
 
         // Kembalikan data sebagai JSON
         return response()->json([

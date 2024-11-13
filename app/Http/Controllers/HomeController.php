@@ -42,7 +42,7 @@ class HomeController extends Controller
     public function getAllProjects()
     {
         // Get all projects without any filter
-        $projects = Project::with(['categories', 'year', 'stakeholder', 'team'])->get();
+        $projects = Project::with(['categories', 'year', 'stakeholder', 'team', 'image'])->get();
 
         return response()->json([
             'status' => 'success',

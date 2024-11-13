@@ -11,11 +11,12 @@ class Team extends Model
     use HasFactory;
 
     public function project(){
-        return $this->hasMany(Project::class)->get();
+        return $this->hasMany(Project::class, 'team_id');
     }
 
     public function team_member(){
-        return $this->hasMany(Team_member::class)->get();
+        return $this->hasMany(Team_member::class, 'team_id');
     }
 
 }
+    

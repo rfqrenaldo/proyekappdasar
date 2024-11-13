@@ -11,10 +11,10 @@ class Like extends Model
     protected $guarded =[];
     use HasFactory;
     public function project(){
-        return $this->belongsTo(Project::class)->first();
+        return $this->belongsTo(Project::class);
     }
 
     public function User(){
-        return $this->belongsTo(User::class)->first();
+        return $this->belongsTo(User::class, 'users_id');
     }
 }

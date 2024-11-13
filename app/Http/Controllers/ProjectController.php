@@ -54,36 +54,16 @@ class ProjectController extends Controller
 
 
         // Ambil proyek berdasarkan ID tanpa eager loading di model
-        $project = Project::findOrFail($id);
+        $project = Project::with(['image', 'like', 'comment', 'year', 'stakeholder', 'team', 'team.team_member', 'team.team_member.member', 'categories'])->findOrFail($id);
 
         // Ambil relasi secara manual tanpa menggunakan eager loading
 
 
 
-        $data = [
-            'project' => $project,
-            'images' => $project->image(),
-            'like_count' => $project->like()->count(),
-            'comments' => $project->comment(),
-            'description' => $project->description,
-            'name' => $project->name,
-            'categories' => $project->categories(),
-            'year' => $project->year(),
-            'stakeholder' => [
-                'id' => optional($project->stakeholder())->id,
-                'name' => optional($project->stakeholder())->name,
-            ],
-            'team' => [
-                'id' => optional($project->team())->id,
-                'name' => optional($project->team())->name,
-                'members' => $project->team() ? $project->team()->members : [],
-            ],
-        ];
-
         // Kembalikan sebagai JSON
         return response()->json([
             'status' => 'success',
-            'data' => $data,
+            'data' => $project,
         ]);
     }
 
@@ -98,22 +78,14 @@ class ProjectController extends Controller
 
 
         // Ambil detail stakeholder berdasarkan ID tanpa eager loading di model
-        $stakeholder = Stakeholder::findOrFail($id);
+        $stakeholder = Stakeholder::with('projects', 'projects.image')->findOrFail($id);
 
         // Ambil proyek terkait dengan stakeholder
         $projects = $stakeholder->projects()->get();
 
         return response()->json([
             'status' => 'success',
-            'data' => [
-                'stakeholder' => $stakeholder,
-                'projects' => $projects->map(function ($project) {
-                    return [
-                        'id' => $project->id,
-                        'name' => $project->name,
-                    ];
-                }),
-            ],
+            'data' => $stakeholder,
         ]);
     }
 

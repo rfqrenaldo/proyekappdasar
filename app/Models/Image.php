@@ -11,6 +11,7 @@ class Image extends Model
     protected $guarded=[];
     use HasFactory;
     public function project(){
-        return $this->belongsTo(Project::class)->first();
+        return $this->belongsTo(Project::class);
     }
+
 }

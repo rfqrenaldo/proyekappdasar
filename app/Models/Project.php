@@ -10,28 +10,27 @@ class Project extends Model
     use HasFactory;
     protected $guarded = [];
     public function stakeholder(){
-        return $this->belongsTo(Stakeholder::class)->first();
+        return $this->belongsTo(Stakeholder::class);
     }
 
     public function team(){
-        return $this->belongsTo(Team::class)->first();
+        return $this->belongsTo(Team::class);
     }
 
     public function image(){
-        return $this->hasMany(Image::class)->get();
+        return $this->hasMany(Image::class, 'project_id');
     }
     public function comment(){
-        return $this->hasMany(Comment::class)->get();
+        return $this->hasMany(Comment::class, 'project_id');
     }
     public function like(){
-        return $this->hasMany(Like::class)->get();
+        return $this->hasMany(Like::class, 'project_id');
     }
     public function year(){
-        return $this->hasMany(Year::class)->get();
+        return $this->hasMany(Year::class, 'project_id');
     }
     public function categories(){
-        return $this->belongsToMany(Category::class)->get();
+        return $this->belongsToMany(Category::class);
     }
-
 
 }
