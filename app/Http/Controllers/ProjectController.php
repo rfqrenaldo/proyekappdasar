@@ -59,7 +59,7 @@ class ProjectController extends Controller
         // Ambil relasi secara manual tanpa menggunakan eager loading
 
 
-        
+
         $data = [
             'project' => $project,
             'images' => $project->image(),
