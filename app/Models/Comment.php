@@ -11,9 +11,9 @@ class Comment extends Model
     protected $table ='comments';
     protected $guarded =[];
     public function project(){
-        return $this->belongsTo(Project::class)->first();
+        return $this->belongsTo(Project::class);
     }
     public function User(){
-        return $this->belongsToMany(User::class)->get();
+        return $this->belongsToMany(User::class);
     }
 }

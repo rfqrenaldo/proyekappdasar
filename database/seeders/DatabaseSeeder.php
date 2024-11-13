@@ -264,12 +264,12 @@ class DatabaseSeeder extends Seeder
         [
             'user_id' => 1,
             'project_id' => 1,
-            'isi_komen' => 'mantap.',
+            'isi_komen' => 'absen bang',
         ],
         [
             'user_id' => 2,
             'project_id' => 1,
-            'isi_komen' => 'bagus.',
+            'isi_komen' => 'telat ga bang',
         ],
         [
             'user_id' => 3,
@@ -279,17 +279,17 @@ class DatabaseSeeder extends Seeder
         [
             'user_id' => 1,
             'project_id' => 2,
-            'isi_komen' => 'fiturnya oke.',
+            'isi_komen' => 'aur auran',
         ],
         [
             'user_id' => 4,
             'project_id' => 3,
-            'isi_komen' => 'ui nya keren.',
+            'isi_komen' => 'emang gitu liriknya kocak',
         ],
         [
             'user_id' => 5,
             'project_id' => 3,
-            'isi_komen' => 'josss.',
+            'isi_komen' => 'sebut namaku bang',
         ],
         // Tambahkan data komentar lainnya sesuai kebutuhan
 

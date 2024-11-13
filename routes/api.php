@@ -50,3 +50,9 @@ Route::get('/members/{id}', [ProjectController::class, 'DetailMember'])->name('a
 
 //Route API untuk melihat semua member atau mahasiswa
 Route::get('/mahasiswa', [MahasiswaController::class, 'view_NavMember'])->name('api.stakeholders.list');
+
+//Route API untuk melihat detail mahasiswa
+Route::get('/mahasiswa/{id}', [MahasiswaController::class, 'DetailMahasiswa'])->name('api.members.detail');
+
+// Route API untuk search
+Route::get('/search', [ProjectController::class, 'searchProjects'])->name('api.projects.search');

@@ -12,10 +12,14 @@ class Team_member extends Model
         protected $guarded = [];
 
         public function team(){
-            return $this->belongsTo(Team::class)->first();
+            return $this->belongsTo(Team::class);
         }
         public function member(){
-            return $this->belongsTo(Member::class)->first();
+            return $this->belongsTo(Member::class);
+        }
+
+        public function project(){
+            return $this->belongsTo(Project::class);
         }
 
 }

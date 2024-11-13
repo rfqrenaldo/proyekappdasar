@@ -13,6 +13,6 @@ class Category extends Model
     protected $guarded=[];
     use HasFactory;
     public function projectCategory(){
-        return $this->hasMany(ProjectCategory::class)->get();
+        return $this->hasMany(ProjectCategory::class, 'category_id');
     }
 }
