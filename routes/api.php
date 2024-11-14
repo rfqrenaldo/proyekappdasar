@@ -42,6 +42,9 @@ Route::get('/stakeholders/{id}', [ProjectController::class, 'DetailStakeholder']
 // Route API untuk melihat semua stakeholder
 Route::get('/stakeholders', [StakeholderController::class, 'view_NavStakeholder'])->name('api.stakeholders.list');
 
+// Route API untuk search stakeholder berdasarkan nama atau nama proyek
+Route::get('/stakeholders/search', [StakeholderController::class, 'searchStakeholder'])->name('api.stakeholders.search');
+
 // Route API untuk melihat detail tim beserta anggota
 Route::get('/teams/{id}', [ProjectController::class, 'DetailTeam'])->name('api.teams.detail');
 
@@ -51,8 +54,11 @@ Route::get('/members/{id}', [ProjectController::class, 'DetailMember'])->name('a
 //Route API untuk melihat semua member atau mahasiswa
 Route::get('/mahasiswa', [MahasiswaController::class, 'view_NavMember'])->name('api.stakeholders.list');
 
+//Route API untuk search di navbar mahasiswa
+Route::get('/mahasiswa/search', [MahasiswaController::class, 'searchMahasiswa'])->name('api.projects.search');
+
 //Route API untuk melihat detail mahasiswa
 Route::get('/mahasiswa/{id}', [MahasiswaController::class, 'DetailMahasiswa'])->name('api.members.detail');
 
 // Route API untuk search
-Route::get('/search', [ProjectController::class, 'searchProjects'])->name('api.projects.search');
+Route::get('/projects/search', [ProjectController::class, 'searchProjects'])->name('api.projects.search');

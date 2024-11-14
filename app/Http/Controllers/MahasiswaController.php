@@ -23,10 +23,32 @@ class MahasiswaController extends Controller
         ]);
     }
 
+     // Search mahasiswa by name, team name, or project name
+     public function searchMahasiswa(Request $request)
+     {
+         $keyword = $request->input('keyword');
+
+         // Search members based on the keyword
+         $members = Member::where('name', 'like', '%' . $keyword . '%')
+             ->orWhereHas('team_member', function ($query) use ($keyword) {
+                 $query->where('name', 'like', '%' . $keyword . '%');
+             })
+             ->orWhereHas('projects', function ($query) use ($keyword) {
+                 $query->where('name', 'like', '%' . $keyword . '%');
+             })
+             ->with(['team_member', 'projects'])
+             ->get();
+
+         return response()->json([
+             'status' => 'success',
+             'data' => $members,
+         ]);
+     }
+
 
     public function DetailMahasiswa($id)
     {
-        
+
         $member = Member::with(['Project', 'Project.image'])->find($id);
 
         return response()->json([
