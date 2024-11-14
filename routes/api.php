@@ -57,8 +57,5 @@ Route::get('/mahasiswa', [MahasiswaController::class, 'view_NavMember'])->name('
 //Route API untuk search di navbar mahasiswa
 Route::get('/mahasiswa/search', [MahasiswaController::class, 'searchMahasiswa'])->name('api.projects.search');
 
-//Route API untuk melihat detail mahasiswa
-Route::get('/mahasiswa/{id}', [MahasiswaController::class, 'DetailMahasiswa'])->name('api.members.detail');
-
 // Route API untuk search
 Route::get('/projects/search', [ProjectController::class, 'searchProjects'])->name('api.projects.search');

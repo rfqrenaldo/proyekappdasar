@@ -8,7 +8,7 @@ use Illuminate\Http\Request;
 class StakeholderController extends Controller
 {
     // Menampilkan semua stakeholder di navbar
-    public function view_NavStakeholder()
+    public function view_NavStakeholder() //bisa diganti index
     {
         // Ambil semua stakeholder
         $stakeholders = Stakeholder::with(['projects'])->get();

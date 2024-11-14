@@ -11,7 +11,7 @@ class MahasiswaController extends Controller
 {
     //nampilin semua mahasiswa
     //nampilin detail mahasiswa
-    public function view_NavMember()
+    public function view_NavMember() //penamaan fungsi bisa diganti index
     {
         //jika navbar mahasiswa dipencet dapat melihat semua mahasiswa (mahasiswa adalah member dari team)dan jika mahasiswa dipencet dapat memunculkan project yang dimiliki mahasiswa tersebut
         // Get all projects without any filter
@@ -46,14 +46,14 @@ class MahasiswaController extends Controller
      }
 
 
-    public function DetailMahasiswa($id)
-    {
+    // public function DetailMahasiswa($id)
+    // {
 
-        $member = Member::with(['Project', 'Project.image'])->find($id);
+    //     $member = Member::with(['Project', 'Project.image'])->find($id);
 
-        return response()->json([
-            'status' => 'success',
-            'data' => $member
-        ]);
-    }
+    //     return response()->json([
+    //         'status' => 'success',
+    //         'data' => $member
+    //     ]);
+    // }
 }
