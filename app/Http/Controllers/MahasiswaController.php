@@ -46,14 +46,14 @@ class MahasiswaController extends Controller
      }
 
 
-    // public function DetailMahasiswa($id)
-    // {
+    public function DetailMahasiswa($id)
+    {
 
-    //     $member = Member::with(['Project', 'Project.image'])->find($id);
+        $member = Member::with(['Project', 'Project.image'])->find($id);
 
-    //     return response()->json([
-    //         'status' => 'success',
-    //         'data' => $member
-    //     ]);
-    // }
+        return response()->json([
+            'status' => 'success',
+            'data' => $member
+        ]);
+    }
 }
