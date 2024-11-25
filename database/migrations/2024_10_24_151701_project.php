@@ -21,8 +21,10 @@ return new class extends Migration
         Schema::create('projects', function (Blueprint $table) {
             $table->id();
             $table->string('nama_proyek');
-            $table->foreignIdFor(Stakeholder::class);
-            $table->foreignIdFor(Team::class);
+            $table->foreignIdFor(Stakeholder::class)
+            ->constrained();
+            $table->foreignIdFor(Team::class)
+            ->constrained();
             $table->text('logo')->nullable();
             $table->text('deskripsi')->nullable();
             $table->timestamps();

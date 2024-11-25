@@ -16,8 +16,10 @@ return new class extends Migration
     {
         Schema::create('likes', function (Blueprint $table) {
             $table->id();
-            $table->foreignIdFor(User::class);
-            $table->foreignIdFor(Project::class);
+            $table->foreignIdFor(User::class)
+            ->constrained();
+            $table->foreignIdFor(Project::class)
+            ->constrained();
             $table->timestamps();
         });
     }

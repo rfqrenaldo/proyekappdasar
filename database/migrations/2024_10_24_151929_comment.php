@@ -16,8 +16,10 @@ return new class extends Migration
     {
         Schema::create('comments', function (Blueprint $table) {
             $table->id();
-            $table->foreignIdFor(User::class);
-            $table->foreignIdFor(Project::class);
+            $table->foreignIdFor(User::class)
+            ->constrained();
+            $table->foreignIdFor(Project::class)
+            ->constrained();
             $table->text('isi_komen');
             $table->timestamps();
         });

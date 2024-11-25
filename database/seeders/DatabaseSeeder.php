@@ -321,46 +321,69 @@ class DatabaseSeeder extends Seeder
         ],
 
     ];
-    public function run(): void
-    {
-        foreach ($this->anggotaTeam as $key => $value) {
-            Team_member::create($value);
-        }
-        foreach($this->anggota as $key=> $value){
-            Member::create($value);
-        }
-        foreach($this->team as $key=> $value){
-            Team::create($value);
-        }
-        foreach($this->stakeholders as $key=> $value){
-            Stakeholder::create($value);
-        }
-        foreach($this->proyek as $key=> $value){
-            Project::create($value);
-        }
-        foreach($this->kategori as $key=> $value){
-            Category::create($value);
-        }
-        foreach($this->kategori_proyek as $key=> $value){
-            ProjectCategory::create($value);
-        }
-        foreach($this->tahun_proyek as $key=> $value){
-            Year::create($value);
-        }
-        foreach($this->users as $key=> $value){
-            $value["password"] = Hash::make($value["password"]);
-            User::create($value);
-        }
-        foreach ($this->images as $key=>$value) {
-            Image::create($value);
-        }
-        foreach ($this->comment as $key=>$value) {
-            Comment::create($value);
-        }
-        foreach ($this->like as $key=>$value) {
-            Like::create($value);
-        }
+    // public function run(): void
+    // {
+    //     foreach ($this->team as $value) {
+    //         Team::create($value);
+    //     }
+
+    //     // 2. Seed data untuk tabel `anggota` (member)
+    //     foreach ($this->anggota as $value) {
+    //         Member::create($value);
+    //     }
+
+    //     // 3. Seed data untuk tabel `anggotaTeam` (team_member)
+    //     foreach ($this->anggotaTeam as $value) {
+    //         Team_member::create($value);
+    //     }
+    //     foreach($this->stakeholders as $key=> $value){
+    //         Stakeholder::create($value);
+    //     }
+    //     foreach($this->proyek as $key=> $value){
+    //         Project::create($value);
+    //     }
+    //     foreach($this->kategori as $key=> $value){
+    //         Category::create($value);
+    //     }
+    //     foreach($this->kategori_proyek as $key=> $value){
+    //         ProjectCategory::create($value);
+    //     }
+    //     foreach($this->tahun_proyek as $key=> $value){
+    //         Year::create($value);
+    //     }
+    //     foreach($this->users as $key=> $value){
+    //         $value["password"] = Hash::make($value["password"]);
+    //         User::create($value);
+    //     }
+    //     foreach ($this->images as $key=>$value) {
+    //         Image::create($value);
+    //     }
+    //     foreach ($this->comment as $key=>$value) {
+    //         Comment::create($value);
+    //     }
+    //     foreach ($this->like as $key=>$value) {
+    //         Like::create($value);
+    //     }
 
 
-    }
+    // }
+
+    public function run()
+{
+    $this->call([
+        TeamsSeeder::class,
+        MembersSeeder::class,
+        TeamMembersSeeder::class,
+        StakeholdersSeeder::class,
+        ProjectsSeeder::class,
+        CategoriesSeeder::class,
+        ProjectCategoriesSeeder::class,
+        YearsSeeder::class,
+        UsersSeeder::class,
+        ImagesSeeder::class,
+        CommentsSeeder::class,    
+        LikesSeeder::class,
+    ]);
+}
+
 }
