@@ -13,30 +13,19 @@ class ProjectController extends Controller
 {
 
 
-    public function searchProjects(Request $request)
+    public function searchProjects($keyword)
     {
         // Validasi input keyword agar berupa string dan opsional
-        $validatedData = $request->validate([
-            'keyword' => 'string|nullable|max:255'
-        ]);
+        // $validatedData = $keyword->validate([
+        //     'keyword' => 'string|nullable|max:255'
+        // ]);
 
-        $keyword = $validatedData['keyword'];
+        // $keyword = $validatedData['keyword'];
+
+
 
         // Query pencarian yang mempertimbangkan beberapa kolom dan relasi
-        $projects = Project::where('name', 'like', '%' . $keyword . '%')
-            ->orWhereHas('stakeholder', function ($query) use ($keyword) {
-                $query->where('name', 'like', '%' . $keyword . '%'); // Mencari di nama stakeholder
-            })
-            ->orWhereHas('team', function ($query) use ($keyword) {
-                $query->where('name', 'like', '%' . $keyword . '%'); // Mencari di nama tim
-            })
-            ->orWhereHas('year', function ($query) use ($keyword) {
-                $query->where('year', 'like', '%' . $keyword . '%'); // Mencari di tahun
-            })
-            ->orWhereHas('categories', function ($query) use ($keyword) {
-                $query->where('name', 'like', '%' . $keyword . '%'); // Mencari di kategori
-            })
-            ->get();
+        $projects = Project::with(['image'])->where('nama_proyek', 'like', '%' . $keyword . '%')->get();
 
         // Mengembalikan respons JSON
         return response()->json([
@@ -57,8 +46,6 @@ class ProjectController extends Controller
         $project = Project::with(['image', 'like', 'comment', 'year', 'stakeholder', 'team', 'team.team_member', 'team.team_member.member', 'categories'])->findOrFail($id);
 
         // Ambil relasi secara manual tanpa menggunakan eager loading
-
-
 
         // Kembalikan sebagai JSON
         return response()->json([
@@ -99,18 +86,11 @@ class ProjectController extends Controller
 
 
         // Ambil detail tim berdasarkan ID tanpa eager loading di model
-        $team = Team::findOrFail($id);
-
-        // Ambil anggota terkait dengan tim
-        $members = $team->team_member()->get();
-
+        $team = Team::with(['team_member', 'team_member.member', 'project', 'project.image'])->findOrFail($id);
 
         return response()->json([
             'status' => 'success',
-            'data' => [
-                'team' => $team,
-                'members' => $members,
-            ],
+            'data' => $team,
         ]);
     }
 
@@ -146,7 +126,7 @@ class ProjectController extends Controller
                 }),
             ],
         ]);
-}
+    }
 
 
 
@@ -160,9 +140,3 @@ class ProjectController extends Controller
 
 
 }
-
-
-
-
-
-
