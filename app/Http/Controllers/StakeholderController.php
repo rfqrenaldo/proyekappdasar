@@ -20,29 +20,45 @@ class StakeholderController extends Controller
         ]);
     }
 
-    public function searchStakeholder(Request $request)
-    {
-        $stakeholderName = $request->input('stakeholder_name');
-        $projectName = $request->input('project_name');
+    // public function searchStakeholder(Request $request)
+    // {
+    //     $stakeholderName = $request->input('stakeholder_name');
+    //     $projectName = $request->input('project_name');
 
-        $query = Stakeholder::query();
+    //     $query = Stakeholder::query();
 
-        if ($stakeholderName) {
-            $query->where('name', 'like', '%' . $stakeholderName . '%');
+    //     if ($stakeholderName) {
+    //         $query->where('name', 'like', '%' . $stakeholderName . '%');
+    //     }
+
+    //     if ($projectName) {
+    //         $query->whereHas('projects', function ($q) use ($projectName) {
+    //             $q->where('name', 'like', '%' . $projectName . '%');
+    //         });
+    //     }
+
+    //     $stakeholders = $query->with('projects')->get();
+
+    //     // Kembalikan data sebagai JSON
+    //     return response()->json([
+    //         'status' => 'success',
+    //         'data' => $stakeholders,
+    //     ]);
+    // }
+
+
+    public function searchStakeholder($keyword){
+        $stakeholder = Stakeholder::with(['projects'])->where('nama', 'like', '%' . $keyword . '%')->get();
+
+        if ($stakeholder->isEmpty()) {
+            return response()->json([
+                'status' => 'error',
+                'message' => 'Nama Stakeholder tidak ditemukan'
+            ]);
         }
-
-        if ($projectName) {
-            $query->whereHas('projects', function ($q) use ($projectName) {
-                $q->where('name', 'like', '%' . $projectName . '%');
-            });
-        }
-
-        $stakeholders = $query->with('projects')->get();
-
-        // Kembalikan data sebagai JSON
         return response()->json([
             'status' => 'success',
-            'data' => $stakeholders,
+            'data' => $stakeholder
         ]);
     }
 }

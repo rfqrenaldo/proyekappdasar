@@ -62,7 +62,7 @@ class LoginController extends Controller
         }
 
 
-        //validation agar pass yang baru tidak sama dengan lama 
+        //validation agar pass yang baru tidak sama dengan lama
 
         // Simpan data pengguna
         $user = User::create([
