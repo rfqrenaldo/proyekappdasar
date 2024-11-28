@@ -225,10 +225,10 @@ class DatabaseSeeder extends Seeder
     ];
     private $images = [
         // Project 1
+        ['project_id' => 1, 'link_gambar' => 'https://fastly.picsum.photos/id/593/420/220.jpg?hmac=5cJ_-ytAO2kMbsqIYJBmTGvfPhzlWkL33kM9zPJX1kU'],
         ['project_id' => 1, 'link_gambar' => 'https://tse1.mm.bing.net/th?id=OIP.YCjPRaOLipkncsvEibKS6QHaD4&pid=Api&P=0&h=220'],
         ['project_id' => 1, 'link_gambar' => 'https://tse1.mm.bing.net/th?id=OIP.YCjPRaOLipkncsvEibKS6QHaD4&pid=Api&P=0&h=220'],
-        ['project_id' => 1, 'link_gambar' => 'https://tse1.mm.bing.net/th?id=OIP.YCjPRaOLipkncsvEibKS6QHaD4&pid=Api&P=0&h=220'],
-        ['project_id' => 1, 'link_gambar' => 'https://tse1.mm.bing.net/th?id=OIP.YCjPRaOLipkncsvEibKS6QHaD4&pid=Api&P=0&h=220'],
+        ['project_id' => 1, 'link_gambar' => 'https://fastly.picsum.photos/id/593/420/220.jpg?hmac=5cJ_-ytAO2kMbsqIYJBmTGvfPhzlWkL33kM9zPJX1kU'],
         ['project_id' => 1, 'link_gambar' => 'https://tse1.mm.bing.net/th?id=OIP.YCjPRaOLipkncsvEibKS6QHaD4&pid=Api&P=0&h=220'],
 
         // Project 2
