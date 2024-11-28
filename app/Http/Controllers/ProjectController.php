@@ -47,9 +47,6 @@ class ProjectController extends Controller
 
         // Ambil relasi secara manual tanpa menggunakan eager loading
 
-
-
-
         // Kembalikan sebagai JSON
         return response()->json([
             'status' => 'success',

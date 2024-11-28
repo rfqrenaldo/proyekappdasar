@@ -15,8 +15,10 @@ return new class extends Migration
     {
         Schema::create('category_project', function (Blueprint $table) {
             $table->id();
-            $table->foreignId('project_id');
-            $table->foreignId('category_id');
+            $table->foreignIdFor(Project::class)
+            ->constrained();
+            $table->foreignIdFor(Category::class)
+            ->constrained();
             $table->timestamps();
         });
     }

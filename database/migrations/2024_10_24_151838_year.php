@@ -14,7 +14,8 @@ return new class extends Migration
     {
         Schema::create('years', function (Blueprint $table) {
             $table->id();
-            $table->foreignIdFor(Project::class);
+            $table->foreignIdFor(Project::class)
+            ->constrained();
             $table->year('tahun');
             $table->timestamps();
         });

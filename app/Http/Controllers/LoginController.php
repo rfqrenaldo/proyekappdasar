@@ -5,7 +5,7 @@ namespace App\Http\Controllers;
 use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
-use App\Models\User; // Pastikan model User sudah ada
+use App\Models\User;
 use Illuminate\Support\Facades\Validator;
 
 class LoginController extends Controller
@@ -60,6 +60,9 @@ class LoginController extends Controller
                 'messages' => $validator->errors(),
             ], 400);
         }
+
+
+        //validation agar pass yang baru tidak sama dengan lama 
 
         // Simpan data pengguna
         $user = User::create([

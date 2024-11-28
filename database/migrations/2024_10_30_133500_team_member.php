@@ -16,8 +16,9 @@ return new class extends Migration
         Schema::create('anggota_teams', function (Blueprint $table) {
             $table->id();
             $table->enum('role', ['pm', 'fe', 'be', 'ui_ux']);
-            $table->foreignIdFor(Team::class);
-            $table->foreignIdFor(Member::class);
+            $table->foreignIdFor(Team::class)
+            ->constrained();
+            $table->foreignIdFor(Member::class)->constrained('anggotas');
             $table->timestamps();
 
         });
