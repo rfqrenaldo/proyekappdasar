@@ -13,16 +13,16 @@ class ProjectController extends Controller
 {
     public function searchProjects($keyword)
     {
-        // Validasi input keyword agar berupa string dan opsional
-        // $validatedData = $keyword->validate([
-        //     'keyword' => 'string|nullable|max:255'
-        // ]);
-
-        // $keyword = $validatedData['keyword'];
-
         // Query pencarian yang mempertimbangkan beberapa kolom dan relasi
         $projects = Project::with(['image'])->where('nama_proyek', 'like', '%' . $keyword . '%')->get();
 
+        if ($projects->isEmpty()) {
+            return response()->json([
+                'status' => 'error',
+                'message' => 'Proyek tidak ditemukan'
+            ]);
+        }
+        
         // Mengembalikan respons JSON
         return response()->json([
             'status' => 'success',
@@ -37,11 +37,8 @@ class ProjectController extends Controller
         // team bisa dipencet terdirect ke Detailteam dan didalam nya ada nama nama membernya
         // nama membernya bisa dipencet lalu mengarahkan ke DetailMember
 
-
         // Ambil proyek berdasarkan ID tanpa eager loading di model
         $project = Project::with(['image', 'like', 'comment', 'year', 'stakeholder', 'team', 'team.team_member', 'team.team_member.member', 'categories'])->findOrFail($id);
-
-        // Ambil relasi secara manual tanpa menggunakan eager loading
 
         // Kembalikan sebagai JSON
         return response()->json([
@@ -54,12 +51,7 @@ class ProjectController extends Controller
 
     public function DetailStakeholder($id)
     {
-
-
         //jika stakeholder dipencet dapat melihat detail stakeholdernya
-        // di stakeholder dapat melihat list project yang dimiliki stakeholder tersebut dan bila dipencet langsung terdirect ke projectnya
-
-
         // Ambil detail stakeholder berdasarkan ID tanpa eager loading di model
         $stakeholder = Stakeholder::with('projects', 'projects.image')->findOrFail($id);
 
@@ -75,12 +67,7 @@ class ProjectController extends Controller
 
     public function DetailTeam($id)
     {
-
-
         // jika team dipencet maka akan muncul nama nama membernya//
-
-
-
         // Ambil detail tim berdasarkan ID tanpa eager loading di model
         $team = Team::with(['team_member', 'team_member.member', 'project', 'project.image'])->findOrFail($id);
 
@@ -92,10 +79,7 @@ class ProjectController extends Controller
 
     public function DetailMember($id)
     {
-
-
         // jika member dipencet dapat melihat detail membernya memiliki proyek apa saja
-
 
         // Ambil detail anggota berdasarkan ID
         $member = Member::findOrFail($id);
@@ -116,23 +100,11 @@ class ProjectController extends Controller
                     return [
                         'id' => $project->id,
                         'name' => $project->name,
-                        'description' => $project->description, // Menambahkan deskripsi proyek
-                        // Tambahkan data lain sesuai yang dibutuhkan
+                        'description' => $project->description,
                     ];
                 }),
             ],
         ]);
     }
-
-
-
-
-
-
-
-
-    //HAPUSSSSS ANGKA 2
-
-
 
 }

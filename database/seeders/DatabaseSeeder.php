@@ -369,21 +369,21 @@ class DatabaseSeeder extends Seeder
     // }
 
     public function run()
-{
-    $this->call([
-        TeamsSeeder::class,
-        MembersSeeder::class,
-        TeamMembersSeeder::class,
-        StakeholdersSeeder::class,
-        ProjectsSeeder::class,
-        CategoriesSeeder::class,
-        ProjectCategoriesSeeder::class,
-        YearsSeeder::class,
-        UsersSeeder::class,
-        ImagesSeeder::class,
-        CommentsSeeder::class,    
-        LikesSeeder::class,
-    ]);
-}
+    {
+        $this->call([
+            TeamsSeeder::class,
+            MembersSeeder::class,
+            TeamMembersSeeder::class,
+            StakeholdersSeeder::class,
+            ProjectsSeeder::class,
+            CategoriesSeeder::class,
+            ProjectCategoriesSeeder::class,
+            YearsSeeder::class,
+            UsersSeeder::class,
+            ImagesSeeder::class,
+            CommentsSeeder::class,
+            LikesSeeder::class,
+        ]);
+    }
 
 }
