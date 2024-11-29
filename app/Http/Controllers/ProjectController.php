@@ -11,8 +11,6 @@ use Illuminate\Http\Request;
 
 class ProjectController extends Controller
 {
-
-
     public function searchProjects($keyword)
     {
         // Validasi input keyword agar berupa string dan opsional
@@ -21,8 +19,6 @@ class ProjectController extends Controller
         // ]);
 
         // $keyword = $validatedData['keyword'];
-
-
 
         // Query pencarian yang mempertimbangkan beberapa kolom dan relasi
         $projects = Project::with(['image'])->where('nama_proyek', 'like', '%' . $keyword . '%')->get();

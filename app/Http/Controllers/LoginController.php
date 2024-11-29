@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Http\Controllers\Controller;
+use App\Http\Resources\RegisterResource;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use App\Models\User;
@@ -66,15 +67,15 @@ class LoginController extends Controller
 
         // Simpan data pengguna
         $user = User::create([
-            'name' => $request->name,
-            'email' => $request->email,
-            'password' => bcrypt($request->password), // Enkripsi password
+            'name' => $request->input('name'),
+            'email' => $request->input('email'),
+            'password' => bcrypt($request->input('password')), // Enkripsi password
         ]);
 
         $data = [
             'status' => 'true',
             'data' => [
-                'messages' => 'User registered successfully',
+                'messages' => new RegisterResource($user),
             ],
         ];
         return response()->json($data, 201);

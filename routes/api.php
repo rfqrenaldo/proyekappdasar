@@ -24,8 +24,8 @@ Route::middleware('auth:sanctum')->get('/user', function (Request $request) {
 });
 
 // Route API untuk registrasi dan login
-Route::post('register', [LoginController::class, 'register']);
-Route::post('login', [LoginController::class, 'login']);
+Route::post('/register', [LoginController::class, 'register']);
+Route::post('/login', [LoginController::class, 'login']);
 
 // Route API untuk filter proyek berdasarkan kategori dan tahun
 Route::get('/projects/filter', [HomeController::class, 'filterProjects'])->name('api.projects.filter');
