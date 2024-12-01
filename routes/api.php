@@ -28,7 +28,7 @@ Route::post('/register', [LoginController::class, 'register']);
 Route::post('/login', [LoginController::class, 'login']);
 
 // Route API untuk filter proyek berdasarkan kategori dan tahun
-Route::get('/projects/filter', [HomeController::class, 'filterProjects'])->name('api.projects.filter');
+Route::post('/projects/filter', [HomeController::class, 'filterProjects'])->name('api.projects.filter');
 
 // Route API untuk melihat semua proyek
 Route::get('/projects', [HomeController::class, 'getAllProjects'])->name('api.projects.list');
@@ -43,7 +43,7 @@ Route::get('/stakeholders/{id}', [ProjectController::class, 'DetailStakeholder']
 Route::get('/stakeholders', [StakeholderController::class, 'view_NavStakeholder'])->name('api.stakeholders.list');
 
 // Route API untuk search stakeholder berdasarkan nama atau nama proyek
-Route::get('/stakeholders/search', [StakeholderController::class, 'searchStakeholder'])->name('api.stakeholders.search');
+Route::get('/stakeholders/search/{keyword}', [StakeholderController::class, 'searchStakeholder'])->name('api.stakeholders.search');
 
 // Route API untuk melihat detail tim beserta anggota
 Route::get('/teams/{id}', [ProjectController::class, 'DetailTeam'])->name('api.teams.detail');
@@ -55,7 +55,7 @@ Route::get('/members/{id}', [ProjectController::class, 'DetailMember'])->name('a
 Route::get('/mahasiswa', [MahasiswaController::class, 'view_NavMember'])->name('api.stakeholders.list');
 
 //Route API untuk search di navbar mahasiswa
-Route::get('/mahasiswa/search', [MahasiswaController::class, 'searchMahasiswa'])->name('api.projects.search');
+Route::get('/mahasiswa/search/{keyword}', [MahasiswaController::class, 'searchMahasiswa'])->name('api.projects.search');
 
 //Route API untuk melihat detail mahasiswa
 Route::get('/mahasiswa/{id}', [MahasiswaController::class, 'DetailMahasiswa'])->name('api.members.detail');
