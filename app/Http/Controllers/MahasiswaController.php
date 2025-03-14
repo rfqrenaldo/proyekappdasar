@@ -6,6 +6,7 @@ use App\Models\Member;
 use App\Models\Project;
 use App\Models\Team_member;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Storage;
 
 class MahasiswaController extends Controller
 {
@@ -23,27 +24,7 @@ class MahasiswaController extends Controller
         ]);
     }
 
-    //  // Search mahasiswa by name, team name, or project name
-    //  public function searchMahasiswa(Request $request)
-    //  {
-    //      $keyword = $request->input('keyword');
 
-    //      // Search members based on the keyword
-    //      $members = Member::where('name', 'like', '%' . $keyword . '%')
-    //          ->orWhereHas('team_member', function ($query) use ($keyword) {
-    //              $query->where('name', 'like', '%' . $keyword . '%');
-    //          })
-    //          ->orWhereHas('projects', function ($query) use ($keyword) {
-    //              $query->where('name', 'like', '%' . $keyword . '%');
-    //          })
-    //          ->with(['team_member', 'projects'])
-    //          ->get();
-
-    //      return response()->json([
-    //          'status' => 'success',
-    //          'data' => $members,
-    //      ]);
-    //  }
 
      public function searchMahasiswa($keyword){
 
@@ -72,4 +53,98 @@ class MahasiswaController extends Controller
             'data' => $member
         ]);
     }
+
+    public function storeMahasiswa(Request $request)
+    {
+        // Validasi input
+        $request->validate([
+            'nama_lengkap' => 'required|string|max:255',
+            'NIM' => 'required|string|max:20|',
+            'foto' => 'nullable|image|mimes:jpeg,png,jpg,gif|max:2048',
+        ]);
+
+        try {
+            // Upload foto jika ada
+            $fotoPath = null;
+            if ($request->hasFile('foto')) {
+                $fotoPath = $request->file('foto')->store('anggota_foto', 'public');
+            }
+
+            // Simpan data anggota ke database
+            $member = Member::create([
+                'nama_lengkap' => $request->nama_lengkap,
+                'NIM' => $request->NIM,
+                'foto' => $fotoPath,
+            ]);
+
+            return response()->json([
+                'message' => 'Mahasiswa berhasil ditambahkan!',
+                'data' => $member,
+            ], 201);
+        } catch (\Exception $e) {
+            return response()->json([
+                'message' => 'Terjadi kesalahan saat menambahkan mahasiswa',
+                'error' => $e->getMessage(),
+            ], 500);
+        }
+    }
+
+public function updateMahasiswa(Request $request, $id)
+{
+    $request->validate([
+        'nama_lengkap' => 'required|string|max:255',
+        'NIM' => 'required|string|max:20|',
+        'foto' => 'nullable|image|mimes:jpeg,png,jpg,gif|max:2048',
+    ]);
+
+    $member = Member::find($id);
+    if (!$member) {
+        return response()->json(['message' => 'Mahasiswa tidak ditemukan'], 404);
+    }
+
+    try {
+        if ($request->hasFile('foto')) {
+            // Delete the old photo if it exists
+            if ($member->foto) {
+                Storage::disk('public')->delete($member->foto);
+            }
+
+            // Store the new photo
+            $fotoPath = $request->file('foto')->store('pitcure_of_student', 'public');
+            $member->foto = $fotoPath;
+        }
+
+        $member->nama_lengkap = $request->nama_lengkap;
+        $member->NIM = $request->NIM;
+        $member->save();
+
+        return response()->json([
+            'message' => 'Mahasiswa berhasil diperbarui!',
+            'data' => $member,
+        ], 200);
+    } catch (\Exception $e) {
+        return response()->json(['message' => 'Terjadi kesalahan saat memperbarui mahasiswa'], 500);
+    }
+}
+
+public function deleteMahasiswa($id)
+{
+    // Cari mahasiswa berdasarkan ID
+    $member = Member::find($id);
+    if (!$member) {
+        return response()->json(['message' => 'Mahasiswa tidak ditemukan!'], 404);
+    }
+
+    // Hapus foto jika ada
+    if ($member->foto) {
+        Storage::disk('public')->delete($member->foto);
+    }
+
+    // Hapus mahasiswa dari database
+    $member->delete();
+
+    return response()->json(['message' => 'Mahasiswa berhasil dihapus!'], 200);
+}
+
+
 }

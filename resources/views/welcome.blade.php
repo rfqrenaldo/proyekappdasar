@@ -128,6 +128,9 @@
                     </div>
                 </div>
             </div>
-        </div>
+                <a href="auth/redirect" class="text white">Login with Google</a>
+            <div>
+
+
     </body>
 </html>

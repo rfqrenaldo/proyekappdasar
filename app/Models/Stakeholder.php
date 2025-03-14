@@ -8,6 +8,7 @@ use Illuminate\Database\Eloquent\Model;
 class Stakeholder extends Model
 {
     use HasFactory;
+    protected $table = 'stakeholders';
     protected $guarded = [];
     public function projects(){
         return $this->hasMany(Project::class, 'stakeholder_id');

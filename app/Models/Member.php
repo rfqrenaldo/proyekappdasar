@@ -12,21 +12,15 @@ class Member extends Model
     protected $table = "anggotas";
     protected $guarded=[];
     use HasFactory;
-    
+
     public function team_member(){
         return $this->hasMany(Team_member::class);
     }
 
-    // public function projects()
-    // {
-    //     return $this->hasManyThrough(Project::class, Team_member::class); // Menghubungkan Member ke Project lewat Team_member
-    // }
 
     public function project() {
         return $this->hasMany(Project::class, 'team_id')->with('image');
     }
 
-    // public function image() {
-    //     return $this->hasMany(Image::class, 'project_id');
-    // }
+
 }

@@ -25,11 +25,12 @@ return new class extends Migration
             ->constrained();
             $table->foreignIdFor(Team::class)
             ->constrained();
-            $table->text('logo')->nullable();
             $table->text('deskripsi')->nullable();
+            $table->text('link_proyek')->nullable();
             $table->timestamps();
         });
     }
+
 
     /**
      * Reverse the migrations.
