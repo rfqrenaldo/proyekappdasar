@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Models\Member;
 use App\Models\Project;
+use App\Models\Team;
 use App\Models\Team_member;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
@@ -53,6 +54,51 @@ class MahasiswaController extends Controller
             'data' => $member
         ]);
     }
+
+    //untuk form add team
+    public function storeTeamMember(Request $request){
+
+        // Validasi input
+        $anggotas=[];
+        $request->validate([
+            'nama_tim' => 'required|string|max:255',
+            'member_*' => 'required|exists:anggotas,id',
+
+        ]);
+
+        $team = Team::create([
+            'nama_tim' => $request->nama_tim,
+        ]);
+
+        $roles = ['pm', 'fe','be','ui_ux'];
+        foreach ($roles as $role){
+            $anggota = Team_member::create([
+                'role' => $role,
+                'team_id' => $team->id,
+                'member_id' => $request['member_'.$role],
+            ]);
+            $anggotas[] = $anggota;
+        }
+
+        // Simpan data ke tabel anggota_teams
+
+
+        return response()->json([
+            'message' => 'Anggota berhasil ditambahkan ke tim!',
+            'data' => $anggotas
+        ], 201);
+    }
+
+
+
+    public function updateTeamMember(Request $request, $id){
+
+    }
+
+    public function deleteTeamMember($id){
+
+    }
+
 
     public function storeMahasiswa(Request $request)
     {
