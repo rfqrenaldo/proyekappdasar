@@ -22,11 +22,11 @@ return new class extends Migration
             $table->id();
             $table->string('nama_proyek');
             $table->foreignIdFor(Stakeholder::class)
-            ->constrained();
+                ->constrained();
             $table->foreignIdFor(Team::class)
-            ->constrained();
+                ->constrained();
+            $table->text('logo')->nullable();
             $table->text('deskripsi')->nullable();
-            $table->text('link_proyek')->nullable();
             $table->timestamps();
         });
     }

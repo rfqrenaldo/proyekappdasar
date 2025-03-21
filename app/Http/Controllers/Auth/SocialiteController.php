@@ -1,8 +1,10 @@
 <?php
+
 namespace App\Http\Controllers\Auth;
 
 use App\Http\Controllers\Controller;
 use App\Models\User;
+use Auth;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
 use Laravel\Socialite\Facades\Socialite;
@@ -17,49 +19,31 @@ class SocialiteController extends Controller
     public function callback()
     {
         try {
-            $googleUser = Socialite::driver('google')->user();
-
-            // Cek apakah user Google memiliki email
-            if (!$googleUser->getEmail()) {
-                return response()->json([
-                    'status' => false,
-                    'message' => 'Google account does not have an email address'
-                ], 400);
-            }
+            $googleUser = Socialite::driver('google')->stateless()->user();
 
             // Cek apakah user sudah terdaftar
-            $user = User::where('google_id', $googleUser->getId())
-                ->orWhere('email', $googleUser->getEmail())
-                ->first();
-
-            if (!$user) {
-                $user = User::create([
+            $user = User::firstOrCreate(
+                ['email' => $googleUser->getEmail()],
+                [
                     'google_id' => $googleUser->getId(),
                     'name' => $googleUser->getName(),
-                    'email' => $googleUser->getEmail(),
-                    'password' => Hash::make('randompassword123'), // Dummy password
+                    'password' => Hash::make('randompassword123'),
                     'google_token' => $googleUser->token,
                     'google_refresh_token' => $googleUser->refreshToken,
-                ]);
-            } else {
-                // Update token Google jika user sudah ada
-                $user->update([
-                    'google_token' => $googleUser->token,
-                    'google_refresh_token' => $googleUser->refreshToken,
-                ]);
-            }
+                ]
+            );
 
-            // Buat token Sanctum
-            $token = $user->createToken('authToken')->plainTextToken;
+            // Update token Google jika user sudah ada
+            $user->update([
+                'google_token' => $googleUser->token,
+                'google_refresh_token' => $googleUser->refreshToken,
+            ]);
 
-            return response()->json([
-                'status' => true,
-                'user' => [
-                    'name' => $user->name,
-                    'email' => $user->email,
-                ],
-                'token' => $token,
-            ], 200);
+            // Loginkan user & Sanctum otomatis kasih cookie
+            Auth::login($user);
+
+            // Redirect ke frontend setelah login
+            return redirect('http://localhost:3000/home');
         } catch (\Exception $e) {
             return response()->json([
                 'status' => false,
@@ -68,6 +52,7 @@ class SocialiteController extends Controller
             ], 500);
         }
     }
+
 
     public function logout(Request $request)
     {
