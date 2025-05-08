@@ -15,7 +15,7 @@ return new class extends Migration
         Schema::create('years', function (Blueprint $table) {
             $table->id();
             $table->foreignIdFor(Project::class)
-            ->constrained();
+            ->constrained()->onDelete('cascade');
             $table->year('tahun');
             $table->timestamps();
         });

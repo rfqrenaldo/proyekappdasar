@@ -17,19 +17,18 @@ return new class extends Migration
      * Run the migrations.
      */
     public function up(): void
-    {
-        Schema::create('projects', function (Blueprint $table) {
-            $table->id();
-            $table->string('nama_proyek');
-            $table->foreignIdFor(Stakeholder::class)
-            ->constrained();
-            $table->foreignIdFor(Team::class)
-            ->constrained();
-            $table->text('deskripsi')->nullable();
-            $table->text('link_proyek')->nullable();
-            $table->timestamps();
-        });
-    }
+{
+    Schema::create('projects', function (Blueprint $table) {
+        $table->id();
+        $table->string('nama_proyek');
+        $table->foreignIdFor(Stakeholder::class)->constrained()->onDelete('cascade');
+        $table->foreignIdFor(Team::class)->constrained()->onDelete('cascade');
+        $table->text('deskripsi')->nullable();
+        $table->text('link_proyek')->nullable();
+        $table->timestamps();
+    });
+}
+
 
 
     /**

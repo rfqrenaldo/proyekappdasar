@@ -16,7 +16,7 @@ return new class extends Migration
         Schema::create('category_project', function (Blueprint $table) {
             $table->id();
             $table->foreignIdFor(Project::class)
-            ->constrained();
+            ->constrained()->onDelete('cascade');
             $table->foreignIdFor(Category::class)
             ->constrained();
             $table->timestamps();

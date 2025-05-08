@@ -30,6 +30,10 @@ Route::post('/login', [LoginController::class, 'login']);
 Route::post('/projects/filter', [HomeController::class, 'filterProjects'])->name('api.projects.filter');
 Route::get('/projects', [HomeController::class, 'getAllProjects'])->name('api.projects.list');
 Route::get('/projects/{id}', [ProjectController::class, 'view_project'])->name('api.projects.view');
+Route::post('/projects/storeProject', [ProjectController::class, 'storeProject'])->name('api.projects.store');
+Route::put('/projects/updateProject/{id}', [ProjectController::class, 'updateProject'])->name('api.projects.update');
+Route::delete('/projects/deleteProject/{id}', [ProjectController::class, 'deleteProject'])->name('api.projects.delete');
+
 
 // Rute API stakeholder
 Route::get('/stakeholders/{id}', [ProjectController::class, 'DetailStakeholder'])->name('api.stakeholders.detail');

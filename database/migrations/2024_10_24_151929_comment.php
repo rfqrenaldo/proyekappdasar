@@ -19,7 +19,7 @@ return new class extends Migration
             $table->foreignIdFor(User::class)
             ->constrained();
             $table->foreignIdFor(Project::class)
-            ->constrained();
+            ->constrained()->onDelete('cascade');
             $table->text('isi_komen');
             $table->timestamps();
         });
