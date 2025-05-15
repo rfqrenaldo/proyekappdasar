@@ -65,6 +65,10 @@ class MahasiswaController extends Controller
             'member_*' => 'required|exists:anggotas,id',
 
         ]);
+        $user= auth()->user();
+        if ($user->role != 'admin') {
+            return abort(403);
+        }
 
         $team = Team::create([
             'nama_tim' => $request->nama_tim,
@@ -90,16 +94,6 @@ class MahasiswaController extends Controller
     }
 
 
-
-    public function updateTeamMember(Request $request, $id){
-
-    }
-
-    public function deleteTeamMember($id){
-
-    }
-
-
     public function storeMahasiswa(Request $request)
     {
         // Validasi input
@@ -108,6 +102,10 @@ class MahasiswaController extends Controller
             'NIM' => 'required|string|max:20|',
             'foto' => 'nullable|image|mimes:jpeg,png,jpg,gif|max:2048',
         ]);
+        $user= auth()->user();
+        if ($user->role != 'admin') {
+            return abort(403);
+        }
 
         try {
             // Upload foto jika ada
@@ -142,6 +140,10 @@ public function updateMahasiswa(Request $request, $id)
         'NIM' => 'required|string|max:20|',
         'foto' => 'nullable|image|mimes:jpeg,png,jpg,gif|max:2048',
     ]);
+    $user= auth()->user();
+        if ($user->role != 'admin') {
+            return abort(403);
+        }
 
     $member = Member::find($id);
     if (!$member) {
@@ -175,6 +177,10 @@ public function updateMahasiswa(Request $request, $id)
 
 public function deleteMahasiswa($id)
 {
+    $user= auth()->user();
+        if ($user->role != 'admin') {
+            return abort(403);
+        }
     // Cari mahasiswa berdasarkan ID
     $member = Member::find($id);
     if (!$member) {

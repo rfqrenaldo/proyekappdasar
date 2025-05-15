@@ -15,7 +15,7 @@ class LoginController extends Controller
     {
         // Validasi input
         $validator = Validator::make($request->all(), [
-            'name' => 'required|string',
+            'email' => 'required|string',
             'password' => 'required',
         ]);
 
@@ -27,14 +27,16 @@ class LoginController extends Controller
         }
 
         // Cek kredensial
-        if (Auth::attempt(['name' => $request->name, 'password' => $request->password])) {
+        if (Auth::attempt($request->only('email', 'password'))) {
             $user = Auth::user();
+
 
             $data = [
                 'status' => 'true',
                 'data' => [
                     'email' => $user->email,
                     'name' => $user->name,
+                    "token" => $user->createToken($request['email'])->plainTextToken
                 ],
             ];
             return response()->json($data, 200);
