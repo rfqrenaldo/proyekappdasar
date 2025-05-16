@@ -54,10 +54,10 @@ Route::get('/members/{id}', [ProjectController::class, 'DetailMember'])->name('a
 Route::get('/mahasiswa', [MahasiswaController::class, 'view_NavMember'])->name('api.stakeholders.list');
 Route::get('/mahasiswa/search/{keyword}', [MahasiswaController::class, 'searchMahasiswa'])->name('api.projects.search');
 Route::get('/mahasiswa/{id}', [MahasiswaController::class, 'DetailMahasiswa'])->name('api.members.detail');
-Route::post('/mahasiswa/storeMember',[MahasiswaController::class, 'storeMahasiswa'])->name('api.members.store');
+Route::post('/mahasiswa/storeMember', [MahasiswaController::class, 'storeMahasiswa'])->name('api.members.store');
 Route::put('/mahasiswa/updateMember/{id}', [MahasiswaController::class, 'updateMahasiswa'])->name('api.mahasiswa.update');
 Route::delete('/mahasiswa/deleteMember/{id}', [MahasiswaController::class, 'deleteMahasiswa'])->name('api.mahasiswa.delete');
-Route::post('/mahasiswa/storeTeamMember',[MahasiswaController::class, 'storeTeamMember'])->name('api.members.storeTeamMember');
+Route::post('/mahasiswa/storeTeamMember', [MahasiswaController::class, 'storeTeamMember'])->name('api.members.storeTeamMember');
 
 // Rute API pencarian proyek
 Route::get('/search/{keyword}', [ProjectController::class, 'searchProjects'])->name('api.projects.search');
