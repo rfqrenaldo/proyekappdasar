@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\Category;
+use App\Models\Comment;
 use App\Models\Image;
 use App\Models\Member;
 use App\Models\Project;
@@ -112,7 +113,8 @@ class ProjectController extends Controller
 
     public function storeProject(Request $request)
     {
-    $data = $request->validate([
+
+    $request->validate([
         'nama_proyek' => 'required|string|max:255',
         'stakeholder_id' => 'required|exists:stakeholders,id',
         'team_id' => 'required|exists:teams,id',
@@ -124,6 +126,10 @@ class ProjectController extends Controller
         'images' => 'nullable|array',
         'images.*' => 'image|mimes:jpeg,png,jpg,gif,webp|max:2048', // maksimal 2MB per gambar
     ]);
+    $user= auth()->user();
+        if ($user->role != 'admin') {
+            return abort(403);
+        }
 
     // Simpan proyek baru ke dalam tabel `projects`
     $project = Project::create([
@@ -182,6 +188,10 @@ class ProjectController extends Controller
             'images' => 'nullable|array',
             'images.*' => 'image|mimes:jpeg,png,jpg,gif,webp|max:2048', // maksimal 2MB per gambar
         ]);
+         $user= auth()->user();
+        if ($user->role != 'admin') {
+            return abort(403);
+        }
 
         // Temukan proyek berdasarkan ID
         $project = Project::findOrFail($id);
@@ -239,6 +249,10 @@ class ProjectController extends Controller
     {
         // Temukan proyek berdasarkan ID
         $project = Project::findOrFail($project_id);
+        $user= auth()->user();
+        if ($user->role != 'admin') {
+            return abort(403);
+        }
 
         // Hapus gambar terkait proyek
         foreach ($project->image as $img) {
@@ -268,6 +282,10 @@ class ProjectController extends Controller
             'be' => 'required|exists:anggotas,id',
             'ui_ux' => 'required|exists:anggotas,id',
         ]);
+        $user= auth()->user();
+        if ($user->role != 'admin') {
+            return abort(403);
+        }
 
         try {
             // Mulai transaksi database untuk mencegah kesalahan data
@@ -305,4 +323,108 @@ class ProjectController extends Controller
             return redirect()->back()->with('error', 'Gagal membuat tim: ' . $e->getMessage());
         }
     }
+
+    public function commentProject(Request $request, $id)
+    {
+        // Validasi input
+        $request->validate([
+            'comment' => 'required|string|max:255',
+        ]);
+
+        // Temukan proyek berdasarkan ID
+        $project = Project::findOrFail($id);
+
+        // Simpan komentar ke dalam tabel `comments`
+        $comment= $project->comments()->create([
+            'isi_komen' => $request->comment,
+            'user_id' => auth()->id(), // Menggunakan ID pengguna yang sedang login
+        ]);
+
+        return response()->json([
+            'message' => 'Komentar berhasil ditambahkan',
+            'comment' => $comment
+        ], 201);
+    }
+    public function deleteComment($comment_id)
+    {
+        $comment = Comment::findOrFail($comment_id);
+        $user= auth()->user();
+        if ($user->role != 'admin'&&$comment->user_id != $user->id) {
+            return response()->json([
+                'message' => 'Hanya admin yang dapat menghapus komentar'
+            ], 403);
+        }
+        // Temukan komentar berdasarkan ID
+
+        // Hapus komentar
+        $comment->delete();
+
+        return response()->json([
+            'message' => 'Komentar berhasil dihapus'
+        ], 200);
+    }
+    public function getComments($id)
+    {
+        // Temukan proyek berdasarkan ID
+        $project = Project::findOrFail($id);
+
+        // Ambil semua komentar untuk proyek ini
+        $comments = $project->comments()->with('user')->get();
+
+        return response()->json([
+            'comments' => $comments,
+        ]);
+    }
+
+    public function likeProject($id)
+    {
+        // Temukan proyek berdasarkan ID
+        $project = Project::findOrFail($id);
+
+        // Cek apakah pengguna sudah menyukai proyek ini
+        $like = $project->likes()->where('user_id', auth()->id())->first();
+
+        if ($like) {
+            // Jika sudah, hapus like
+            $like->delete();
+            return response()->json([
+                'message' => 'Like dihapus',
+                'status' => 'unliked'
+            ]);
+        } else {
+            // Jika belum, tambahkan like
+            $project->likes()->create([
+                'user_id' => auth()->id(),
+            ]);
+            return response()->json([
+                'message' => 'Proyek disukai',
+                'status' => 'liked'
+            ]);
+        }
+    }
+   public function getLikeStatus($id)
+    {
+        // Temukan proyek berdasarkan ID
+        $project = Project::findOrFail($id);
+
+        // Cek apakah pengguna sudah menyukai proyek ini
+        $like = $project->likes()->where('user_id', auth()->id())->first();
+
+        return response()->json([
+            'liked' => $like ? true : false,
+        ]);
+    }
+    public function getLikes($id)
+    {
+        // Temukan proyek berdasarkan ID
+        $project = Project::findOrFail($id);
+
+        // Ambil jumlah like untuk proyek ini
+        $likesCount = $project->likes()->count();
+
+        return response()->json([
+            'likes_count' => $likesCount,
+        ]);
+    }
+
 }

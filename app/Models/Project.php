@@ -20,10 +20,10 @@ class Project extends Model
     public function image(){
         return $this->hasMany(Image::class, 'project_id');
     }
-    public function comment(){
+    public function comments(){
         return $this->hasMany(Comment::class, 'project_id');
     }
-    public function like(){
+    public function likes(){
         return $this->hasMany(Like::class, 'project_id');
     }
     public function year(){

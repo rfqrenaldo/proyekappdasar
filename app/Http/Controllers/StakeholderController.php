@@ -52,7 +52,10 @@ class StakeholderController extends Controller
         'email' => 'required|email|',
         'foto' => 'nullable|image|mimes:jpeg,png,jpg,gif|max:2048',
     ]);
-
+    $user= auth()->user();
+        if ($user->role != 'admin') {
+            return abort(403);
+        }
     try {
         // Upload foto jika ada
         $fotoPath = null;
@@ -84,13 +87,17 @@ class StakeholderController extends Controller
 public function updateStakeholder(Request $request, $id)
 // Validasi input
 {
-    $data = $request->validate([
+    $request->validate([
         'nama' => 'required|string|max:255',
         'kategori' => 'required|in:Internal,Eksternal',
         'nomor_telepon' => 'required|string|max:15',
         'email' => 'required|email|max:255',
         'foto' => 'nullable|image|mimes:jpeg,png,jpg,gif|max:2048',
     ]);
+    $user= auth()->user();
+        if ($user->role != 'admin') {
+            return abort(403);
+        }
 
     // // Cari stakeholder berdasarkan ID
     // return response()->json($request->file('foto'));
@@ -135,6 +142,10 @@ public function updateStakeholder(Request $request, $id)
 
 public function deleteStakeholder($id)
 {
+    $user= auth()->user();
+        if ($user->role != 'admin') {
+            return abort(403);
+        }
     // Cari stakeholder berdasarkan ID
     $stakeholder = Stakeholder::find($id);
     if (!$stakeholder) {
