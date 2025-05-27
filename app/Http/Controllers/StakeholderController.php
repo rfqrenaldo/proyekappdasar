@@ -43,177 +43,142 @@ class StakeholderController extends Controller
     }
 
 
-    public function storeStakeholder2(Request $request)
-{
-    // Validasi input
-    $request->validate([
-        'nama' => 'required|string|max:255',
-        'kategori' => 'required|in:Internal,Eksternal',
-        'nomor_telepon' => 'required|string|max:15',
-        'email' => 'required|email',
-        'foto' => 'nullable|image|mimes:jpeg,png,jpg,gif|max:2048',
-    ]);
-
-    $user = auth()->user();
-    if ($user->role != 'admin') {
-        return abort(403);
-    }
-
-    try {
-        // Upload foto jika ada
-        $urlFoto = null;
-        if ($request->hasFile('foto')) {
-            $fotoPath = $request->file('foto')->store('pictures_of_stakeholder', 'public');
-            $urlFoto = asset(Storage::url($fotoPath)); // Ubah path ke URL publik
-        }
-
-        // Simpan data stakeholder ke database
-        $stakeholder = Stakeholder::create([
-            'nama' => $request->nama,
-            'kategori' => $request->kategori,
-            'nomor_telepon' => $request->nomor_telepon,
-            'email' => $request->email,
-            'foto' => $urlFoto, // Simpan sebagai URL
-        ]);
-
-        return response()->json([
-            'message' => 'Stakeholder berhasil ditambahkan!',
-            'data' => $stakeholder,
-        ], 201);
-    } catch (\Exception $e) {
-        return response()->json([
-            'message' => 'Terjadi kesalahan saat menambahkan stakeholder',
-            'error' => $e->getMessage(),
-        ], 500);
-    }
-}
-
     public function storeStakeholder(Request $request)
-{
-    // Validasi input
-    $request->validate([
-        'nama' => 'required|string|max:255',
-        'kategori' => 'required|in:Internal,Eksternal',
-        'nomor_telepon' => 'required|string|max:15',
-        'email' => 'required|email|',
-        'foto' => 'nullable|image|mimes:jpeg,png,jpg,gif|max:2048',
-    ]);
-    $user= auth()->user();
-        if ($user->role != 'admin') {
-            return abort(403);
-        }
-    try {
-        // Upload foto jika ada
-        $fotoPath = null;
-        if ($request->hasFile('foto')) {
-            $fotoPath = $request->file('foto')->store('pictures_of_stakeholder', 'public');
-        }
-
-        // Simpan data stakeholder ke database
-        $stakeholder = Stakeholder::create([
-            'nama' => $request->nama,
-            'kategori' => $request->kategori,
-            'nomor_telepon' => $request->nomor_telepon,
-            'email' => $request->email,
-            'foto' => $fotoPath,
+    {
+        // Validasi input
+        $request->validate([
+            'nama' => 'required|string|max:255',
+            'kategori' => 'required|in:Internal,Eksternal',
+            'nomor_telepon' => 'required|string|max:15',
+            'email' => 'required|email',
+            'foto' => 'nullable|image|mimes:jpeg,png,jpg,gif|max:2048',
         ]);
 
-        return response()->json([
-            'message' => 'Stakeholder berhasil ditambahkan!',
-            'data' => $stakeholder,
-        ], 201);
-    } catch (\Exception $e) {
-        return response()->json([
-            'message' => 'Terjadi kesalahan saat menambahkan stakeholder',
-            'error' => $e->getMessage(),
-        ], 500);
-    }
-}
-
-public function updateStakeholder(Request $request, $id)
-// Validasi input
-{
-    $request->validate([
-        'nama' => 'required|string|max:255',
-        'kategori' => 'required|in:Internal,Eksternal',
-        'nomor_telepon' => 'required|string|max:15',
-        'email' => 'required|email|max:255',
-        'foto' => 'nullable|image|mimes:jpeg,png,jpg,gif|max:2048',
-    ]);
-    $user= auth()->user();
+        $user = auth()->user();
         if ($user->role != 'admin') {
             return abort(403);
         }
 
-    // // Cari stakeholder berdasarkan ID
-    // return response()->json($request->file('foto'));
-    $stakeholder = Stakeholder::find($id);
-    if (!$stakeholder) {
-        return response()->json(['message' => 'Stakeholder tidak ditemukan'], 404);
-    }
-
-    try {
-        $request->request->add(['foto' => $stakeholder->foto]);
-        // Jika ada file foto yang diunggah, simpan dan perbarui
-        if ($request->hasFile('foto')) {
-            // Hapus foto lama jika ada
-            if ($stakeholder->foto) {
-                Storage::disk('public')->delete($stakeholder->foto);
+        try {
+            // Upload foto jika ada
+            $urlFoto = null;
+            if ($request->hasFile('foto')) {
+                $fotoPath = $request->file('foto')->store('picture_of_stakeholder', 'public');
+                $urlFoto = asset(Storage::url($fotoPath)); // Ubah path ke URL publik
             }
 
-            // Simpan foto baru
-            $fotoPath = $request->file('foto')->store('pitcure_of_stakeholder', 'public');
-            $stakeholder->foto = $fotoPath;
+            // Simpan data stakeholder ke database
+            $stakeholder = Stakeholder::create([
+                'nama' => $request->nama,
+                'kategori' => $request->kategori,
+                'nomor_telepon' => $request->nomor_telepon,
+                'email' => $request->email,
+                'foto' => $urlFoto, // Simpan sebagai URL
+            ]);
+
+            return response()->json([
+                'message' => 'Stakeholder berhasil ditambahkan!',
+                'data' => $stakeholder,
+            ], 201);
+        } catch (\Exception $e) {
+            return response()->json([
+                'message' => 'Terjadi kesalahan saat menambahkan stakeholder',
+                'error' => $e->getMessage(),
+            ], 500);
         }
-
-        // Perbarui data stakeholder
-        $stakeholder->nama = $request->nama;
-        $stakeholder->kategori = $request->kategori;
-        $stakeholder->nomor_telepon = $request->nomor_telepon;
-        $stakeholder->email = $request->email;
-        $stakeholder->save();
-
-        return response()->json([
-            'message' => 'Stakeholder berhasil diperbarui!',
-            'data' => $stakeholder,
-        ], 200);
-    } catch (\Exception $e) {
-        return response()->json(['message' => $e->getMessage()], 500);
-        // return response()->json(['message' => 'Terjadi kesalahan saat memperbarui stakeholder'], 500);
     }
-}
 
 
 
+    public function updateStakeholder(Request $request, $id)
+    {
+        // Validasi input
+        $request->validate([
+            'nama' => 'required|string|max:255',
+            'kategori' => 'required|in:Internal,Eksternal',
+            'nomor_telepon' => 'required|string|max:15',
+            'email' => 'required|email|max:255',
+            'foto' => 'nullable|image|mimes:jpeg,png,jpg,gif|max:2048',
+        ]);
 
-public function deleteStakeholder($id)
-{
-    $user= auth()->user();
+        $user = auth()->user();
         if ($user->role != 'admin') {
             return abort(403);
         }
-    // Cari stakeholder berdasarkan ID
-    $stakeholder = Stakeholder::find($id);
-    if (!$stakeholder) {
-        return response()->json(['message' => 'Stakeholder tidak ditemukan!'], 404);
-    }
 
-    try {
-        // Hapus foto jika ada
-        if ($stakeholder->foto) {
-            Storage::disk('public')->delete($stakeholder->foto);
+        // Cari stakeholder berdasarkan ID
+        $stakeholder = Stakeholder::find($id);
+        if (!$stakeholder) {
+            return response()->json(['message' => 'Stakeholder tidak ditemukan'], 404);
         }
 
-        // Hapus stakeholder dari database
-        $stakeholder->delete();
+        try {
+            // Jika ada file foto yang diunggah, simpan dan perbarui
+            if ($request->hasFile('foto')) {
+                // Hapus foto lama jika ada
+                if ($stakeholder->foto) {
+                    // Ambil hanya path relatif dari URL
+                    $oldPath = str_replace(asset('storage') . '/', '', $stakeholder->foto);
+                    Storage::disk('public')->delete($oldPath);
+                }
 
-        return response()->json(['message' => 'Stakeholder berhasil dihapus!'], 200);
-    } catch (\Exception $e) {
-        return response()->json([
-            'message' => 'Terjadi kesalahan saat menghapus stakeholder',
-            'error' => $e->getMessage(),
-        ], 500);
+                // Simpan foto baru dan ubah ke URL publik
+                $fotoPath = $request->file('foto')->store('picture_of_stakeholder', 'public');
+                $stakeholder->foto = asset(Storage::url($fotoPath));
+            }
+
+            // Perbarui data stakeholder lainnya
+            $stakeholder->nama = $request->nama;
+            $stakeholder->kategori = $request->kategori;
+            $stakeholder->nomor_telepon = $request->nomor_telepon;
+            $stakeholder->email = $request->email;
+            $stakeholder->save();
+
+            return response()->json([
+                'message' => 'Stakeholder berhasil diperbarui!',
+                'data' => $stakeholder,
+            ], 200);
+        } catch (\Exception $e) {
+                return response()->json([
+                    'message' => 'Terjadi kesalahan saat memperbarui stakeholder',
+                    'error' => $e->getMessage(),
+                ], 500);
+            }
     }
-}
+
+
+
+
+    public function deleteStakeholder($id)
+    {
+        $user= auth()->user();
+            if ($user->role != 'admin') {
+                return abort(403);
+            }
+        // Cari stakeholder berdasarkan ID
+        $stakeholder = Stakeholder::find($id);
+        if (!$stakeholder) {
+            return response()->json(['message' => 'Stakeholder tidak ditemukan!'], 404);
+        }
+
+        try {
+            // Hapus foto jika ada
+            if ($stakeholder->foto) {
+            $oldPath = str_replace(asset('storage') . '/', '', $stakeholder->foto);
+            Storage::disk('public')->delete($oldPath);
+        }
+
+
+            // Hapus stakeholder dari database
+            $stakeholder->delete();
+
+            return response()->json(['message' => 'Stakeholder berhasil dihapus!'], 200);
+        } catch (\Exception $e) {
+            return response()->json([
+                'message' => 'Terjadi kesalahan saat menghapus stakeholder',
+                'error' => $e->getMessage(),
+            ], 500);
+        }
+    }
 
 }

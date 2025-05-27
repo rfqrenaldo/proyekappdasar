@@ -113,7 +113,7 @@ public function storeMahasiswa(Request $request)
         // Upload foto jika ada
         $urlFoto = null;
         if ($request->hasFile('foto')) {
-            $fotoPath = $request->file('foto')->store('anggota_foto', 'public');
+            $fotoPath = $request->file('foto')->store('picture_of_student', 'public');
             $urlFoto = asset(Storage::url($fotoPath)); // full URL ke file
         }
 
@@ -136,91 +136,54 @@ public function storeMahasiswa(Request $request)
     }
 }
 
-    // public function storeMahasiswa(Request $request)
-    // {
-    //     // Validasi input
-    //     $request->validate([
-    //         'nama_lengkap' => 'required|string|max:255',
-    //         'NIM' => 'required|string|max:20|',
-    //         'foto' => 'nullable|image|mimes:jpeg,png,jpg,gif|max:2048',
-    //     ]);
-    //     $user= auth()->user();
-    //     if ($user->role != 'admin') {
-    //         return abort(403);
-    //     }
 
-    //     try {
-    //         // Upload foto jika ada
-    //         $fotoPath = null;
-    //         if ($request->hasFile('foto')) {
-    //             $fotoPath = $request->file('foto')->store('anggota_foto', 'public');
-    //         }
-
-    //         // Simpan data anggota ke database
-    //         $member = Member::create([
-    //             'nama_lengkap' => $request->nama_lengkap,
-    //             'NIM' => $request->NIM,
-    //             'foto' => $fotoPath,
-    //         ]);
-
-    //         return response()->json([
-    //             'message' => 'Mahasiswa berhasil ditambahkan!',
-    //             'data' => $member,
-    //         ], 201);
-    //     } catch (\Exception $e) {
-    //         return response()->json([
-    //             'message' => 'Terjadi kesalahan saat menambahkan mahasiswa',
-    //             'error' => $e->getMessage(),
-    //         ], 500);
-    //     }
-    // }
 
 
     public function updateMahasiswa(Request $request, $id)
-{
-    // Validasi input
-    $request->validate([
-        'nama_lengkap' => 'required|string|max:255',
-        'NIM' => 'required|string|max:20',
-        'foto' => 'nullable|image|mimes:jpeg,png,jpg,gif|max:2048',
-    ]);
+    {
+        // Validasi input
+        $request->validate([
+            'nama_lengkap' => 'required|string|max:255',
+            'NIM' => 'required|string|max:20',
+            'foto' => 'nullable|image|mimes:jpeg,png,jpg,gif|max:2048',
+        ]);
 
-    $user = auth()->user();
-    if ($user->role != 'admin') {
-        return abort(403);
-    }
-
-    try {
-        // Cari data mahasiswa berdasarkan ID
-        $member = Member::findOrFail($id);
-
-        // Upload foto baru jika ada
-        if ($request->hasFile('foto')) {
-            // Hapus foto lama jika ada
-            if ($member->foto) {
-                $oldPath = str_replace(asset('storage') . '/', '', $member->foto);
-                Storage::disk('public')->delete($oldPath);
-            }
-
-            $fotoPath = $request->file('foto')->store('anggota_foto', 'public');
-            $member->foto = asset(Storage::url($fotoPath));
+        $user = auth()->user();
+        if ($user->role != 'admin') {
+            return abort(403);
         }
 
-        // Update data lainnya
-        $member->nama_lengkap = $request->nama_lengkap;
-        $member->NIM = $request->NIM;
-        $member->save();
+        try {
+            // Cari data mahasiswa berdasarkan ID
+            $member = Member::findOrFail($id);
 
-        return response()->json([
-            'message' => 'Mahasiswa berhasil diperbarui!',
-            'data' => $member,
-        ], 200);
-    } catch (\Exception $e) {
-        return response()->json([
-            'message' => 'Terjadi kesalahan saat memperbarui mahasiswa',
-            'error' => $e->getMessage(),
-        ], 500);
-    }
+            // Upload foto baru jika ada
+            if ($request->hasFile('foto')) {
+                // Hapus foto lama jika ada
+                if ($member->foto) {
+                    $oldPath = str_replace(asset('storage') . '/', '', $member->foto);
+                    Storage::disk('public')->delete($oldPath);
+                }
+
+                $fotoPath = $request->file('foto')->store('picture_of_student', 'public');
+                $member->foto = asset(Storage::url($fotoPath));
+            }
+
+            // Update data lainnya
+            $member->nama_lengkap = $request->nama_lengkap;
+            $member->NIM = $request->NIM;
+            $member->save();
+
+            return response()->json([
+                'message' => 'Mahasiswa berhasil diperbarui!',
+                'data' => $member,
+            ], 200);
+        } catch (\Exception $e) {
+            return response()->json([
+                'message' => 'Terjadi kesalahan saat memperbarui mahasiswa',
+                'error' => $e->getMessage(),
+            ], 500);
+        }
 }
 
 
