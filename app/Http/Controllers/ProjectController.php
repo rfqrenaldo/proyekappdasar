@@ -121,7 +121,7 @@ class ProjectController extends Controller
         'year' => 'required|integer',
         'deskripsi' => 'required|string',
         'category_project' => 'required|exists:categories,id', // Validasi sesuai ENUM di tabel `categories`
-        'link_proyek' => 'nullable|url',
+        'link_proyek' => 'nullable|String',
         // Validasi array gambar dan tiap gambar di dalamnya
         'images' => 'nullable|array',
         'images.*' => 'image|mimes:jpeg,png,jpg,gif,webp|max:2048', // maksimal 2MB per gambar
@@ -184,7 +184,7 @@ class ProjectController extends Controller
             'year' => 'required|integer',
             'deskripsi' => 'required|string',
             'category_project' => 'required|exists:categories,id', // Validasi sesuai ENUM di tabel `categories`
-            'link_proyek' => 'nullable|url',
+            'link_proyek' => 'nullable|string',
             'images' => 'nullable|array',
             'images.*' => 'image|mimes:jpeg,png,jpg,gif,webp|max:2048', // maksimal 2MB per gambar
         ]);

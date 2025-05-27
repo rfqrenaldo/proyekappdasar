@@ -42,6 +42,52 @@ class StakeholderController extends Controller
         ]);
     }
 
+
+    public function storeStakeholder2(Request $request)
+{
+    // Validasi input
+    $request->validate([
+        'nama' => 'required|string|max:255',
+        'kategori' => 'required|in:Internal,Eksternal',
+        'nomor_telepon' => 'required|string|max:15',
+        'email' => 'required|email',
+        'foto' => 'nullable|image|mimes:jpeg,png,jpg,gif|max:2048',
+    ]);
+
+    $user = auth()->user();
+    if ($user->role != 'admin') {
+        return abort(403);
+    }
+
+    try {
+        // Upload foto jika ada
+        $urlFoto = null;
+        if ($request->hasFile('foto')) {
+            $fotoPath = $request->file('foto')->store('pictures_of_stakeholder', 'public');
+            $urlFoto = asset(Storage::url($fotoPath)); // Ubah path ke URL publik
+        }
+
+        // Simpan data stakeholder ke database
+        $stakeholder = Stakeholder::create([
+            'nama' => $request->nama,
+            'kategori' => $request->kategori,
+            'nomor_telepon' => $request->nomor_telepon,
+            'email' => $request->email,
+            'foto' => $urlFoto, // Simpan sebagai URL
+        ]);
+
+        return response()->json([
+            'message' => 'Stakeholder berhasil ditambahkan!',
+            'data' => $stakeholder,
+        ], 201);
+    } catch (\Exception $e) {
+        return response()->json([
+            'message' => 'Terjadi kesalahan saat menambahkan stakeholder',
+            'error' => $e->getMessage(),
+        ], 500);
+    }
+}
+
     public function storeStakeholder(Request $request)
 {
     // Validasi input
