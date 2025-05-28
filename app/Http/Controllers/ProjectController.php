@@ -15,6 +15,7 @@ use App\Models\Year;
 use Database\Seeders\TeamMembersSeeder;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
+use Storage;
 
 class ProjectController extends Controller
 {
@@ -111,92 +112,100 @@ class ProjectController extends Controller
         ]);
     }
 
+
+
+
     public function storeProject(Request $request)
     {
-
-    $request->validate([
-        'nama_proyek' => 'required|string|max:255',
-        'stakeholder_id' => 'required|exists:stakeholders,id',
-        'team_id' => 'required|exists:teams,id',
-        'year' => 'required|integer',
-        'deskripsi' => 'required|string',
-        'category_project' => 'required|exists:categories,id', // Validasi sesuai ENUM di tabel `categories`
-        'link_proyek' => 'nullable|url',
-        // Validasi array gambar dan tiap gambar di dalamnya
-        'images' => 'nullable|array',
-        'images.*' => 'image|mimes:jpeg,png,jpg,gif,webp|max:2048', // maksimal 2MB per gambar
-    ]);
-    $user= auth()->user();
-        if ($user->role != 'admin') {
-            return abort(403);
-        }
-
-    // Simpan proyek baru ke dalam tabel `projects`
-    $project = Project::create([
-        'nama_proyek' => $request->nama_proyek,
-        'deskripsi' => $request->deskripsi,
-        'stakeholder_id' => $request->stakeholder_id,
-        'team_id' => $request->team_id,
-        'link_proyek' => $request->link_proyek,
-    ]);
-
-    // Cari ID kategori berdasarkan nama_kategori yang dipilih (PAD1 atau PAD2)
-    $category = Category::where('id', $request->category_project)->first();
-
-    // Simpan kategori ke dalam tabel `category_project`
-    if ($category) {
-        ProjectCategory::create([
-            'project_id' => $project->id,
-            'category_id' => $category->id,
-        ]);
-    }
-
-    // Simpan tahun proyek ke dalam tabel `years` (jika tabel ini ada)
-    Year::create([
-        'project_id' => $project->id,
-        'tahun' => $request->year,
-    ]);
-
-    if ($request->hasFile('images')) {
-        foreach ($request->file('images') as $image) {
-            $path = $image->store('projek_foto', 'public');
-            Image::create([
-                'project_id' => $project->id,
-                'link_gambar' => $path,
-            ]);
-        }
-    }
-
-    return response()->json([
-        'message' => 'Project berhasil ditambahkan',
-        'project' => $project->load('image', 'categories')
-    ], 201);
-
-    }
-
-    public function updateProject(Request $request, $id)
-    {
-        // Validasi input
         $request->validate([
             'nama_proyek' => 'required|string|max:255',
             'stakeholder_id' => 'required|exists:stakeholders,id',
             'team_id' => 'required|exists:teams,id',
             'year' => 'required|integer',
             'deskripsi' => 'required|string',
-            'category_project' => 'required|exists:categories,id', // Validasi sesuai ENUM di tabel `categories`
-            'link_proyek' => 'nullable|url',
+            'category_project' => 'required|exists:categories,id',
+            'link_proyek' => 'nullable|string',
             'images' => 'nullable|array',
-            'images.*' => 'image|mimes:jpeg,png,jpg,gif,webp|max:2048', // maksimal 2MB per gambar
+            'images.*' => 'image|mimes:jpeg,png,jpg,gif,webp|max:2048',
         ]);
-         $user= auth()->user();
+
+        $user = auth()->user();
         if ($user->role != 'admin') {
             return abort(403);
         }
 
-        // Temukan proyek berdasarkan ID
+        try {
+            // Simpan proyek baru
+            $project = Project::create([
+                'nama_proyek' => $request->nama_proyek,
+                'deskripsi' => $request->deskripsi,
+                'stakeholder_id' => $request->stakeholder_id,
+                'team_id' => $request->team_id,
+                'link_proyek' => $request->link_proyek,
+            ]);
+
+            // Simpan relasi ke kategori
+            ProjectCategory::create([
+                'project_id' => $project->id,
+                'category_id' => $request->category_project,
+            ]);
+
+            // Simpan tahun proyek
+            Year::create([
+                'project_id' => $project->id,
+                'tahun' => $request->year,
+            ]);
+
+            // Simpan gambar jika ada
+            if ($request->hasFile('images')) {
+                foreach ($request->file('images') as $image) {
+                    $path = $image->store('picture_of_project', 'public');
+                    $url = asset(Storage::url($path)); // Ubah path ke URL lengkap
+                    Image::create([
+                        'project_id' => $project->id,
+                        'link_gambar' => $url,
+                    ]);
+                }
+            }
+
+            return response()->json([
+                'message' => 'Project berhasil ditambahkan',
+                'project' => $project->load(['image', 'categories']),
+            ], 201);
+
+        } catch (\Exception $e) {
+            return response()->json([
+                'message' => 'Terjadi kesalahan saat menyimpan project',
+                'error' => $e->getMessage(),
+            ], 500);
+        }
+}
+
+
+
+
+
+    public function updateProject(Request $request, $id)
+        {
+        $request->validate([
+            'nama_proyek' => 'required|string|max:255',
+            'stakeholder_id' => 'required|exists:stakeholders,id',
+            'team_id' => 'required|exists:teams,id',
+            'year' => 'required|integer',
+            'deskripsi' => 'required|string',
+            'category_project' => 'required|exists:categories,id',
+            'link_proyek' => 'nullable|string',
+            'images' => 'nullable|array',
+            'images.*' => 'image|mimes:jpeg,png,jpg,gif,webp|max:2048',
+        ]);
+
+        $user = auth()->user();
+        if ($user->role != 'admin') {
+            return abort(403);
+        }
+
         $project = Project::findOrFail($id);
 
-        // Perbarui data proyek
         $project->update([
             'nama_proyek' => $request->nama_proyek,
             'deskripsi' => $request->deskripsi,
@@ -206,34 +215,32 @@ class ProjectController extends Controller
         ]);
 
         if ($request->hasFile('images')) {
-            $gambar= $project->image;
-            // Hapus gambar lama jika ada
-            foreach ($gambar as $img) {
-                if (file_exists(public_path('storage/' . $img->link_gambar))) {
-                    unlink(public_path('storage/' . $img->link_gambar));
+            // Hapus gambar lama dari storage dan database
+            foreach ($project->image as $img) {
+                if (Storage::disk('public')->exists(str_replace('storage/', '', parse_url($img->link_gambar, PHP_URL_PATH)))) {
+                    Storage::disk('public')->delete(str_replace('storage/', '', parse_url($img->link_gambar, PHP_URL_PATH)));
                 }
                 $img->delete();
             }
+
+            // Simpan gambar baru dan generate URL publik
             foreach ($request->file('images') as $image) {
-                $path = $image->store('projek_foto', 'public');
+                $path = $image->store('picture_of_project', 'public');
+                $url = asset(Storage::url($path)); // URL publik
                 Image::create([
                     'project_id' => $project->id,
-                    'link_gambar' => $path,
+                    'link_gambar' => $url,
                 ]);
             }
         }
-        // Cari ID kategori berdasarkan nama_kategori yang dipilih (PAD1 atau PAD2)
-        $category = Category::where('id', $request->category_project)->first();
 
-        // Simpan kategori ke dalam tabel `category_project`
-        if ($category) {
-            ProjectCategory::updateOrCreate(
-                ['project_id' => $project->id],
-                ['category_id' => $category->id]
-            );
-        }
+        // Perbarui kategori
+        ProjectCategory::updateOrCreate(
+            ['project_id' => $project->id],
+            ['category_id' => $request->category_project]
+        );
 
-        // Perbarui tahun proyek ke dalam tabel `years` (jika tabel ini ada)
+        // Perbarui tahun
         Year::updateOrCreate(
             ['project_id' => $project->id],
             ['tahun' => $request->year]
@@ -241,26 +248,32 @@ class ProjectController extends Controller
 
         return response()->json([
             'message' => 'Project berhasil diperbarui',
-            'project' => $project
+            'project' => $project->load('image', 'categories')
         ], 200);
     }
 
-    public function deleteProject($project_id)
+
+        public function deleteProject($project_id)
     {
-        // Temukan proyek berdasarkan ID
-        $project = Project::findOrFail($project_id);
-        $user= auth()->user();
+        $user = auth()->user();
         if ($user->role != 'admin') {
             return abort(403);
         }
 
-        // Hapus gambar terkait proyek
+        $project = Project::findOrFail($project_id);
+
+        // Hapus semua gambar terkait
         foreach ($project->image as $img) {
-            if (file_exists(public_path('storage/' . $img->link_gambar))) {
-                unlink(public_path('storage/' . $img->link_gambar));
+            $path = str_replace('storage/', '', parse_url($img->link_gambar, PHP_URL_PATH));
+            if (Storage::disk('public')->exists($path)) {
+                Storage::disk('public')->delete($path);
             }
             $img->delete();
         }
+
+        // Hapus relasi kategori & tahun (opsional, tergantung cascade)
+        ProjectCategory::where('project_id', $project_id)->delete();
+        Year::where('project_id', $project_id)->delete();
 
         // Hapus proyek
         $project->delete();
@@ -269,6 +282,7 @@ class ProjectController extends Controller
             'message' => 'Project berhasil dihapus'
         ], 200);
     }
+
 
 
 
@@ -345,6 +359,7 @@ class ProjectController extends Controller
             'comment' => $comment
         ], 201);
     }
+
     public function deleteComment($comment_id)
     {
         $comment = Comment::findOrFail($comment_id);
