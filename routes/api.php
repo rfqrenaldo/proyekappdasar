@@ -28,6 +28,8 @@ Route::middleware(['auth:sanctum'])->group(function () {
     Route::put('/mahasiswa/updateMember/{id}', [MahasiswaController::class, 'updateMahasiswa'])->name('api.mahasiswa.update');
     Route::delete('/mahasiswa/deleteMember/{id}', [MahasiswaController::class, 'deleteMahasiswa'])->name('api.mahasiswa.delete');
     Route::post('/mahasiswa/storeTeamMember',[MahasiswaController::class, 'storeTeamMember'])->name('api.members.storeTeamMember');
+    Route::put('/mahasiswa/updateTeamMember/{id}', [MahasiswaController::class, 'updateTeamMember'])->name('api.members.updateTeamMember');
+    Route::delete('/mahasiswa/deleteTeamMember/{id}', [MahasiswaController::class, 'deleteTeamMember'])->name('api.members.deleteTeamMember');
     Route::post('/projects/storeProject', [ProjectController::class, 'storeProject'])->name('api.projects.store');
     Route::put('/projects/updateProject/{id}', [ProjectController::class, 'updateProject'])->name('api.projects.update');
     Route::delete('/projects/deleteProject/{id}', [ProjectController::class, 'deleteProject'])->name('api.projects.delete');
@@ -43,7 +45,7 @@ Route::post('/login', [LoginController::class, 'login']);
 // Rute API proyek
 Route::post('/projects/filter', [HomeController::class, 'filterProjects'])->name('api.projects.filter');
 Route::get('/projects', [HomeController::class, 'getAllProjects'])->name('api.projects.list');
-Route::get('/projects/{id}', [ProjectController::class, 'view_project'])->name('api.projects.view');
+Route::get('/projects/{id}', [ProjectController::class, 'DetailProject'])->name('api.projects.detailProject');
 
 
 Route::get('/projects/{id}/comments', [ProjectController::class, 'getComments'])->name('api.projects.comments');

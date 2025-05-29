@@ -38,23 +38,48 @@ class ProjectController extends Controller
         ]);
     }
 
-    public function view_project($id)
+   public function DetailProject(int $id)
     {
-        //controller ini dapat menampilkan projectnya(gambar), kemudian didalamnya ada: jumlah like, isi comment,deskripsi,nama proyek, Category, Tahun, nama stakeholder, nama tim, dan nama member timnya
-        // stakeholder bisa dipencet terdirect ke Detailstakeholder dan didalam nya
-        // team bisa dipencet terdirect ke Detailteam dan didalam nya ada nama nama membernya
-        // nama membernya bisa dipencet lalu mengarahkan ke DetailMember
+        try {
+            // Eager loading semua relasi berdasarkan definisi di model Anda
+            $project = Project::with([
+                'image',           // Project->image() adalah hasMany ke Image
+                'likes',           // Project->likes() adalah hasMany ke Like
+                'comments.user',   // Project->comments() adalah hasMany ke Comment, lalu Comment->user()
+                'categories',      // Project->categories() adalah belongsToMany ke Category
+                'year',            // Project->year() adalah hasMany ke Year
+                'stakeholder',     // Project->stakeholder() adalah belongsTo ke Stakeholder
+                'team',            // Project->team() adalah belongsTo ke Team
+                'team.team_member',    // <--- INI PERBAIKAN: dari 'team.members' menjadi 'team.team_member'
+                'team.team_member.member' // Relasi Team_member->member (asumsi Member model untuk tabel anggotas)
+            ])->findOrFail($id);
 
-        // Ambil proyek berdasarkan ID tanpa eager loading di model
-        $project = Project::with(['image', 'like', 'comment', 'year', 'stakeholder', 'team', 'team.team_member', 'team.team_member.member', 'categories'])->findOrFail($id);
+            // Perhatian:
+            // - $project->image akan menjadi Collection of Image models (karena hasMany)
+            // - $project->year akan menjadi Collection of Year models (karena hasMany)
+            // - $project->categories akan menjadi Collection of Category models (karena belongsToMany)
+            // - $project->team->team_member akan menjadi Collection of Team_member models (karena hasMany)
 
-        // Kembalikan sebagai JSON
-        return response()->json([
-            'status' => 'success',
-            'data' => $project,
-        ]);
+            return response()->json([
+                'status' => 'success',
+                'data' => $project,
+            ], 200);
+
+        } catch (\Illuminate\Database\Eloquent\ModelNotFoundException $e) {
+            // Tangani jika proyek tidak ditemukan
+            return response()->json([
+                'status' => 'error',
+                'message' => 'Proyek tidak ditemukan.',
+            ], 404);
+        } catch (\Exception $e) {
+            // Tangani error umum lainnya
+            return response()->json([
+                'status' => 'error',
+                'message' => 'Terjadi kesalahan saat mengambil detail proyek: ' . $e->getMessage(),
+                'error_code' => $e->getCode(),
+            ], 500);
+        }
     }
-
     public function DetailStakeholder($id)
     {
         //jika stakeholder dipencet dapat melihat detail stakeholdernya

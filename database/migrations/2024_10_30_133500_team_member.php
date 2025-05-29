@@ -16,11 +16,21 @@ return new class extends Migration
         Schema::create('anggota_teams', function (Blueprint $table) {
             $table->id();
             $table->enum('role', ['pm', 'fe', 'be', 'ui_ux']);
-            $table->foreignIdFor(Team::class)
-            ->constrained();
-            $table->foreignIdFor(Member::class)->constrained('anggotas');
-            $table->timestamps();
 
+            // Foreign key untuk team_id dengan onDelete('cascade')
+            $table->foreignIdFor(Team::class)
+                  ->constrained() // Secara default akan membuat kolom team_id dan foreign key
+                  ->onDelete('cascade'); // <<<--- INI YANG PERLU DITAMBAHKAN
+
+            // Foreign key untuk member_id (asumsi mengacu ke tabel 'anggotas')
+            // Umumnya, Anda tidak ingin menghapus anggota jika timnya dihapus,
+            // jadi onDelete('cascade') di sini tidak diperlukan/disarankan
+            // kecuali Anda ingin menghapus anggota dari tabel 'anggotas'
+            // jika assosiasinya ke tim dihapus (yang jarang diinginkan).
+            // Defaultnya adalah 'restrict' atau 'set null'.
+            $table->foreignIdFor(Member::class)
+                  ->constrained('anggotas'); // Menggunakan nama tabel 'anggotas' secara eksplisit jika nama model tidak cocok
+            $table->timestamps();
         });
     }
 
@@ -29,6 +39,6 @@ return new class extends Migration
      */
     public function down(): void
     {
-        //
+        Schema::dropIfExists('anggota_teams'); // Pastikan dropIfExists di down()
     }
 };
