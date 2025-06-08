@@ -29,13 +29,12 @@ class LoginController extends Controller
         // Cek kredensial
         if (Auth::attempt($request->only('email', 'password'))) {
             $user = Auth::user();
-
-
             $data = [
                 'status' => 'true',
                 'data' => [
                     'email' => $user->email,
                     'name' => $user->name,
+                    'role' => $user->role,
                     "token" => $user->createToken($request['email'])->plainTextToken
                 ],
             ];
