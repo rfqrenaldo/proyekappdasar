@@ -29,6 +29,8 @@ return [
 
     'max_age' => 0,
 
+    'paths' => ['api/*', 'sanctum/csrf-cookie', 'storage/*'],
+
     'supports_credentials' => true,
 
 ];

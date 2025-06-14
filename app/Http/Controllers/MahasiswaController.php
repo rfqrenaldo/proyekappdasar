@@ -6,6 +6,7 @@ use App\Models\Member;
 use App\Models\Project;
 use App\Models\Team;
 use App\Models\Team_member;
+use DB;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
 
@@ -92,6 +93,106 @@ class MahasiswaController extends Controller
             'data' => $anggotas
         ], 201);
     }
+
+    public function updateTeamMember(Request $request, $id)
+    {
+        // 1. Validasi Input
+        $anggotas = []; // Inisialisasi array untuk anggota yang diperbarui
+        $request->validate([
+            'nama_tim' => 'sometimes|string|max:255|unique:teams,nama_tim,' . $id,
+            'member_*' => 'sometimes|exists:anggotas,id', // 'sometimes' agar opsional untuk update
+        ]);
+
+        // 2. Periksa Hak Akses (Hanya Admin)
+        $user = auth()->user();
+        if ($user->role != 'admin') {
+            return abort(403, 'Unauthorized access.');
+        }
+
+        // 3. Temukan Tim yang Akan Diupdate
+        $team = Team::find($id);
+        if (!$team) {
+            return response()->json([
+                'message' => 'Tim tidak ditemukan.'
+            ], 404);
+        }
+
+        // 4. Update Nama Tim (Jika Ada di Request)
+        if ($request->has('nama_tim')) {
+            $team->nama_tim = $request->nama_tim;
+            $team->save();
+        }
+
+        // 5. Update Anggota Tim (Jika Ada di Request)
+        // Gunakan array roles yang sama persis seperti di storeTeamMember Anda
+        $roles = ['pm', 'fe', 'be', 'ui_ux'];
+
+        foreach ($roles as $role) { // Iterasi berdasarkan role singkat (pm, fe, dll.)
+            $requestKey = 'member_' . $role; // Contoh: 'member_pm'
+
+            if ($request->has($requestKey)) {
+                // Cari anggota tim berdasarkan team_id dan ROLE SINGKAT
+                $teamMember = Team_member::where('team_id', $team->id)
+                                         ->where('role', $role) // PENTING: Gunakan $role (nama singkat) di sini
+                                         ->first();
+
+                if ($teamMember) {
+                    // Jika anggota tim ditemukan, update member_id-nya
+                    $teamMember->member_id = $request->input($requestKey);
+                    $teamMember->save();
+                    $anggotas[] = $teamMember; // Tambahkan ke array yang diperbarui
+                } else {
+                    // Jika peran anggota tidak ditemukan (misalnya, tim lama tidak punya PM), buat entri baru
+                    // Ini mungkin terjadi jika data sebelumnya tidak konsisten atau peran baru ditambahkan
+                    $newMember = Team_member::create([
+                        'team_id' => $team->id,
+                        'member_id' => $request->input($requestKey),
+                        'role' => $role, // PENTING: Simpan role singkat
+                    ]);
+                    $anggotas[] = $newMember;
+                }
+            }
+        }
+
+        // 6. Berikan Respons Sukses
+        // Muat ulang anggota tim untuk memastikan data terbaru terkirim dalam respons
+        $updatedTeamMembers = Team_member::where('team_id', $team->id)->get();
+
+        return response()->json([
+            'message' => 'Tim dan anggotanya berhasil diperbarui!',
+            'team' => $team,
+            'members' => $updatedTeamMembers // Kirim data anggota tim yang diperbarui
+        ], 200);
+    }
+   public function deleteTeamMember(int $id)
+{
+    $user = auth()->user();
+    if ($user->role != 'admin') {
+        return abort(403, 'Unauthorized access.');
+    }
+
+    try {
+        DB::beginTransaction(); // Tetap baik untuk menjaga konsistensi jika ada operasi lain
+        $team = Team::find($id);
+        if (!$team) {
+            DB::rollBack();
+            return response()->json(['message' => 'Tim tidak ditemukan.'], 404);
+        }
+
+        $team->delete(); // Ini saja sudah cukup! Database akan menghapus anggota_teams.
+
+        DB::commit();
+        return response()->json(['message' => 'Tim dan semua anggotanya berhasil dihapus!'], 200);
+
+    } catch (\Exception $e) {
+        DB::rollBack();
+        return response()->json([
+            'message' => 'Gagal menghapus tim: ' . $e->getMessage(),
+            'error_code' => $e->getCode()
+        ], 500);
+    }
+}
+
 
 
 
