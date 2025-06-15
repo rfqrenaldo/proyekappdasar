@@ -15,6 +15,7 @@ use App\Models\Year;
 use Database\Seeders\TeamMembersSeeder;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
+use Log;
 use Storage;
 
 class ProjectController extends Controller
@@ -109,36 +110,14 @@ class ProjectController extends Controller
 
     public function DetailMember($id)
     {
-        // jika member dipencet dapat melihat detail membernya memiliki proyek apa saja
-
-        // Ambil detail anggota berdasarkan ID
-        $member = Member::findOrFail($id);
-
-        // Ambil proyek yang dimiliki oleh anggota
-        $projects = $member->projects;  // Mengambil proyek melalui relasi hasManyThrough
+        // jika member dipencet maka akan muncul detail membernya
+        $member = Member::with(['team_member', 'team_member.team', 'team_member.project', 'team_member.project.image'])->findOrFail($id);
 
         return response()->json([
             'status' => 'success',
-            'data' => [
-                'member' => [
-                    'id' => $member->id,
-                    'nama_lengkap' => $member->nama_lengkap,
-                    'NIM' => $member->NIM,
-                    'foto' => $member->foto,
-                ],
-                'projects' => $projects->map(function ($project) {
-                    return [
-                        'id' => $project->id,
-                        'name' => $project->name,
-                        'description' => $project->description,
-                    ];
-                }),
-            ],
+            'data' => $member,
         ]);
     }
-
-
-
 
     public function storeProject(Request $request)
     {
