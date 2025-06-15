@@ -74,3 +74,6 @@ Route::get('/mahasiswa/{id}', [MahasiswaController::class, 'DetailMahasiswa'])->
 
 // Rute API pencarian proyek
 Route::get('/search/{keyword}', [ProjectController::class, 'searchProjects'])->name('api.projects.search');
+
+//rute API untuk search Team
+Route::get('/teams/search/{keyword}', [ProjectController::class, 'searchTeam'])->name('api.teams.search');

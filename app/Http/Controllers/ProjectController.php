@@ -394,6 +394,24 @@ class ProjectController extends Controller
             'comments' => $comments,
         ]);
     }
+    public function searchTeam($keyword)
+    {
+        // Query pencarian yang mempertimbangkan nama tim
+        $teams = Team::with(['team_member.member'])->where('nama_tim', 'like', '%' . $keyword . '%')->get();
+
+        if ($teams->isEmpty()) {
+            return response()->json([
+                'status' => 'error',
+                'message' => 'Tim tidak ditemukan'
+            ]);
+        }
+
+        // Mengembalikan respons JSON
+        return response()->json([
+            'status' => 'success',
+            'data' => $teams
+        ]);
+    }
 
     public function likeProject($id)
     {
