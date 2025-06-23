@@ -8,8 +8,17 @@ use App\Http\Controllers\StakeholderController;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 
-Route::middleware('auth:sanctum')->get('/user', function (Request $request) {
-    return response()->json(['user' => $request->user()]);
+Route::middleware('jwt')->get('/user', function (Request $request) {
+        $user = $request->user();
+
+    return response()->json([
+        'data' => [
+            'id' => $user->id,
+            'name' => $user->name,
+            'email' => $user->email,
+            'role' => $user->role,
+        ],
+    ]);
 });
 
 // Rute OAuth Google
@@ -17,7 +26,7 @@ Route::get('/auth/redirect', [SocialiteController::class, 'redirect']);
 Route::get('/auth/google/callback', [SocialiteController::class, 'callback']);
 
 // Rute yang memerlukan otentikasi
-Route::middleware(['auth:sanctum'])->group(function () {
+Route::middleware(['jwt'])->group(function () {
     // Route::get('/dashboard', [HomeController::class, 'getAllProjects'])->name('api.projects.list');
     Route::post('/logout', [SocialiteController::class, 'logout']);
     Route::post('/projects/{id}/comments', [ProjectController::class, 'commentProject'])->name('api.projects.comment');
