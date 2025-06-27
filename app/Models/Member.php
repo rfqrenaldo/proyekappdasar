@@ -18,7 +18,7 @@ class Member extends Model
     }
 
 
-    public function project() {
+    public function projects() {
         return $this->hasMany(Project::class, 'team_id')->with('image');
     }
 

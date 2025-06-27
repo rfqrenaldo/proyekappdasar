@@ -111,8 +111,7 @@ class ProjectController extends Controller
     public function DetailMember($id)
     {
         // jika member dipencet maka akan muncul detail membernya
-        $member = Member::with(['team_member', 'team_member.team', 'team_member.project', 'team_member.project.image'])->findOrFail($id);
-
+        $member = Member::with('projects', 'projects.image')->findOrFail($id);
         return response()->json([
             'status' => 'success',
             'data' => $member,
