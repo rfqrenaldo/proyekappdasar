@@ -54,7 +54,7 @@ class StakeholderController extends Controller
             'foto' => 'nullable|image|mimes:jpeg,png,jpg,gif|max:2048',
         ]);
 
-        $user = auth()->user();
+        $user = request()->user();
         if ($user->role != 'admin') {
             return abort(403);
         }
@@ -101,7 +101,7 @@ class StakeholderController extends Controller
             'foto' => 'nullable|image|mimes:jpeg,png,jpg,gif|max:2048',
         ]);
 
-        $user = auth()->user();
+        $user = request()->user();
         if ($user->role != 'admin') {
             return abort(403);
         }
@@ -151,7 +151,7 @@ class StakeholderController extends Controller
 
     public function deleteStakeholder($id)
     {
-        $user= auth()->user();
+        $user= request()->user();
             if ($user->role != 'admin') {
                 return abort(403);
             }

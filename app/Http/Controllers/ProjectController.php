@@ -132,7 +132,7 @@ class ProjectController extends Controller
             'images.*' => 'image|mimes:jpeg,png,jpg,gif,webp|max:2048',
         ]);
 
-        $user = auth()->user();
+        $user = request()->user();
         if ($user->role != 'admin') {
             return abort(403);
         }
@@ -202,7 +202,7 @@ class ProjectController extends Controller
             'images.*' => 'image|mimes:jpeg,png,jpg,gif,webp|max:2048',
         ]);
 
-        $user = auth()->user();
+        $user = request()->user();
         if ($user->role != 'admin') {
             return abort(403);
         }
@@ -258,7 +258,7 @@ class ProjectController extends Controller
 
         public function deleteProject($project_id)
     {
-        $user = auth()->user();
+        $user = request()->user();
         if ($user->role != 'admin') {
             return abort(403);
         }
@@ -299,7 +299,7 @@ class ProjectController extends Controller
             'be' => 'required|exists:anggotas,id',
             'ui_ux' => 'required|exists:anggotas,id',
         ]);
-        $user= auth()->user();
+        $user= request()->user();
         if ($user->role != 'admin') {
             return abort(403);
         }
@@ -354,7 +354,7 @@ class ProjectController extends Controller
         // Simpan komentar ke dalam tabel `comments`
         $comment= $project->comments()->create([
             'isi_komen' => $request->comment,
-            'user_id' => auth()->id(), // Menggunakan ID pengguna yang sedang login
+            'user_id' => request()->user()->id, // Menggunakan ID pengguna yang sedang login
         ]);
 
         return response()->json([
@@ -366,7 +366,7 @@ class ProjectController extends Controller
     public function deleteComment($comment_id)
     {
         $comment = Comment::findOrFail($comment_id);
-        $user= auth()->user();
+        $user= request()->user();
         if ($user->role != 'admin'&&$comment->user_id != $user->id) {
             return response()->json([
                 'message' => 'Hanya admin yang dapat menghapus komentar'
@@ -418,7 +418,7 @@ class ProjectController extends Controller
         $project = Project::findOrFail($id);
 
         // Cek apakah pengguna sudah menyukai proyek ini
-        $like = $project->likes()->where('user_id', auth()->id())->first();
+        $like = $project->likes()->where('user_id', request()->user()->id)->first();
 
         if ($like) {
             // Jika sudah, hapus like
@@ -430,7 +430,7 @@ class ProjectController extends Controller
         } else {
             // Jika belum, tambahkan like
             $project->likes()->create([
-                'user_id' => auth()->id(),
+                'user_id' => request()->user()->id,
             ]);
             return response()->json([
                 'message' => 'Proyek disukai',
@@ -444,7 +444,8 @@ class ProjectController extends Controller
         $project = Project::findOrFail($id);
 
         // Cek apakah pengguna sudah menyukai proyek ini
-        $like = $project->likes()->where('user_id', auth()->id())->first();
+        $like = $project->likes()->where('user_id', request()->user()->id)->first();
+        
 
         return response()->json([
             'liked' => $like ? true : false,

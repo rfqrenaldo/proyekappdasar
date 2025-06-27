@@ -66,7 +66,7 @@ class MahasiswaController extends Controller
             'member_*' => 'required|exists:anggotas,id',
 
         ]);
-        $user= auth()->user();
+        $user= request()->user();
         if ($user->role != 'admin') {
             return abort(403);
         }
@@ -104,7 +104,7 @@ class MahasiswaController extends Controller
         ]);
 
         // 2. Periksa Hak Akses (Hanya Admin)
-        $user = auth()->user();
+        $user = request()->user();
         if ($user->role != 'admin') {
             return abort(403, 'Unauthorized access.');
         }
@@ -166,7 +166,7 @@ class MahasiswaController extends Controller
     }
    public function deleteTeamMember(int $id)
 {
-    $user = auth()->user();
+    $user = request()->user();
     if ($user->role != 'admin') {
         return abort(403, 'Unauthorized access.');
     }
@@ -205,7 +205,7 @@ public function storeMahasiswa(Request $request)
         'foto' => 'nullable|image|mimes:jpeg,png,jpg,gif|max:2048',
     ]);
 
-    $user = auth()->user();
+    $user = request()->user();
     if ($user->role != 'admin') {
         return abort(403);
     }
@@ -249,7 +249,7 @@ public function storeMahasiswa(Request $request)
             'foto' => 'nullable|image|mimes:jpeg,png,jpg,gif|max:2048',
         ]);
 
-        $user = auth()->user();
+        $user = request()->user();
         if ($user->role != 'admin') {
             return abort(403);
         }
@@ -291,7 +291,7 @@ public function storeMahasiswa(Request $request)
 
 public function deleteMahasiswa($id)
 {
-    $user= auth()->user();
+    $user= request()->user();
         if ($user->role != 'admin') {
             return abort(403);
         }

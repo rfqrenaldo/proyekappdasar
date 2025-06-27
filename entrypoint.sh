@@ -8,23 +8,29 @@ do
   sleep 5
 done
 
-# Copy .env kalau belum ada
+# Copy .env jika belum ada
 if [ ! -f ".env" ]; then
     cp .env.example .env
 fi
 
-# Artisan commands
+# Bersihin cache 
 php artisan config:clear
-php artisan config:cache
 php artisan route:clear
-php artisan route:cache
 php artisan view:clear
-php artisan view:cache
+
+# Generate key 
 php artisan key:generate
+
+# Cache ulang semua
+php artisan config:cache
+php artisan route:cache
+php artisan view:cache
+
+php artisan storage:link
+
+# Jalankan migration dan seeder 
 php artisan migrate --force
 php artisan db:seed --force
-php artisan config:cache
 
-# Start PHP-FPM (or whatever main CMD lo)
-# exec php-fpm
+# Start laravel
 exec php -S 0.0.0.0:8000 -t public

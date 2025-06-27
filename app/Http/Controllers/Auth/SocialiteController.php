@@ -8,6 +8,9 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
 use Laravel\Socialite\Facades\Socialite;
 use Illuminate\Support\Facades\Log;
+use Firebase\JWT\JWT;
+use Firebase\JWT\Key;
+
 
 class SocialiteController extends Controller
 {
@@ -20,7 +23,14 @@ class SocialiteController extends Controller
     public function redirect()
     {
         Log::info('Redirecting to Google for OAuth authentication.');
-        return Socialite::driver('google')->redirect();
+        return Socialite::driver('google')
+            ->with([
+                'hd' => 'mail.ugm.ac.id',
+                'prompt' => 'select_account'
+            ])
+            ->stateless()
+            ->redirect();
+        
     }
 
     /**
@@ -87,7 +97,17 @@ class SocialiteController extends Controller
             }
 
             // Buat token Sanctum untuk otentikasi API
-            $token = $user->createToken('authToken')->plainTextToken;
+            $payload = [
+                'iss' => 'ugm-oauth', // issuer
+                'sub' => $user->id,
+                'name' => $user->name,
+                'email' => $user->email,
+                'role' => $user->role ?? 'user', // default fallback
+                'iat' => time(),
+                'exp' => time() + (60 * 60 * 48), // 24 jam
+            ];
+
+            $token = JWT::encode($payload, env('JWT_SECRET'), 'HS256');
             Log::info('User authenticated successfully and Sanctum token created.', ['user_id' => $user->id, 'email' => $user->email]);
 
             // Redirect ke frontend dengan token di URL
