@@ -28,7 +28,8 @@ class MahasiswaController extends Controller
 
 
 
-     public function searchMahasiswa($keyword){
+    public function searchMahasiswa($keyword)
+    {
 
         $mhs = Member::with('team_member')->where('nama_lengkap', 'like', '%' . $keyword . '%')->get();
         if ($mhs->isEmpty()) {
@@ -41,14 +42,12 @@ class MahasiswaController extends Controller
             'status' => 'success',
             'data' => $mhs
         ]);
-
-     }
+    }
 
 
     public function DetailMahasiswa($id)
     {
-
-        $member = Member::with(['Project', 'Project.image'])->find($id);
+        $member = Member::with(['projects', 'projects.image'])->find($id);
 
         return response()->json([
             'status' => 'success',
@@ -57,16 +56,17 @@ class MahasiswaController extends Controller
     }
 
     //untuk form add team
-    public function storeTeamMember(Request $request){
+    public function storeTeamMember(Request $request)
+    {
 
         // Validasi input
-        $anggotas=[];
+        $anggotas = [];
         $request->validate([
             'nama_tim' => 'required|string|max:255',
             'member_*' => 'required|exists:anggotas,id',
 
         ]);
-        $user= request()->user();
+        $user = request()->user();
         if ($user->role != 'admin') {
             return abort(403);
         }
@@ -75,12 +75,12 @@ class MahasiswaController extends Controller
             'nama_tim' => $request->nama_tim,
         ]);
 
-        $roles = ['pm', 'fe','be','ui_ux'];
-        foreach ($roles as $role){
+        $roles = ['pm', 'fe', 'be', 'ui_ux'];
+        foreach ($roles as $role) {
             $anggota = Team_member::create([
                 'role' => $role,
                 'team_id' => $team->id,
-                'member_id' => $request['member_'.$role],
+                'member_id' => $request['member_' . $role],
             ]);
             $anggotas[] = $anggota;
         }
@@ -133,8 +133,8 @@ class MahasiswaController extends Controller
             if ($request->has($requestKey)) {
                 // Cari anggota tim berdasarkan team_id dan ROLE SINGKAT
                 $teamMember = Team_member::where('team_id', $team->id)
-                                         ->where('role', $role) // PENTING: Gunakan $role (nama singkat) di sini
-                                         ->first();
+                    ->where('role', $role) // PENTING: Gunakan $role (nama singkat) di sini
+                    ->first();
 
                 if ($teamMember) {
                     // Jika anggota tim ditemukan, update member_id-nya
@@ -164,78 +164,77 @@ class MahasiswaController extends Controller
             'members' => $updatedTeamMembers // Kirim data anggota tim yang diperbarui
         ], 200);
     }
-   public function deleteTeamMember(int $id)
-{
-    $user = request()->user();
-    if ($user->role != 'admin') {
-        return abort(403, 'Unauthorized access.');
-    }
+    public function deleteTeamMember(int $id)
+    {
+        $user = request()->user();
+        if ($user->role != 'admin') {
+            return abort(403, 'Unauthorized access.');
+        }
 
-    try {
-        DB::beginTransaction(); // Tetap baik untuk menjaga konsistensi jika ada operasi lain
-        $team = Team::find($id);
-        if (!$team) {
+        try {
+            DB::beginTransaction(); // Tetap baik untuk menjaga konsistensi jika ada operasi lain
+            $team = Team::find($id);
+            if (!$team) {
+                DB::rollBack();
+                return response()->json(['message' => 'Tim tidak ditemukan.'], 404);
+            }
+
+            $team->delete(); // Ini saja sudah cukup! Database akan menghapus anggota_teams.
+
+            DB::commit();
+            return response()->json(['message' => 'Tim dan semua anggotanya berhasil dihapus!'], 200);
+        } catch (\Exception $e) {
             DB::rollBack();
-            return response()->json(['message' => 'Tim tidak ditemukan.'], 404);
+            return response()->json([
+                'message' => 'Gagal menghapus tim: ' . $e->getMessage(),
+                'error_code' => $e->getCode()
+            ], 500);
         }
-
-        $team->delete(); // Ini saja sudah cukup! Database akan menghapus anggota_teams.
-
-        DB::commit();
-        return response()->json(['message' => 'Tim dan semua anggotanya berhasil dihapus!'], 200);
-
-    } catch (\Exception $e) {
-        DB::rollBack();
-        return response()->json([
-            'message' => 'Gagal menghapus tim: ' . $e->getMessage(),
-            'error_code' => $e->getCode()
-        ], 500);
-    }
-}
-
-
-
-
-public function storeMahasiswa(Request $request)
-{
-    // Validasi input
-    $request->validate([
-        'nama_lengkap' => 'required|string|max:255',
-        'NIM' => 'required|string|max:20',
-        'foto' => 'nullable|image|mimes:jpeg,png,jpg,gif|max:2048',
-    ]);
-
-    $user = request()->user();
-    if ($user->role != 'admin') {
-        return abort(403);
     }
 
-    try {
-        // Upload foto jika ada
-        $urlFoto = null;
-        if ($request->hasFile('foto')) {
-            $fotoPath = $request->file('foto')->store('picture_of_student', 'public');
-            $urlFoto = asset(Storage::url($fotoPath)); // full URL ke file
-        }
 
-        // Simpan data anggota ke database dengan URL lengkap
-        $member = Member::create([
-            'nama_lengkap' => $request->nama_lengkap,
-            'NIM' => $request->NIM,
-            'foto' => $urlFoto, // langsung simpan URL lengkap ke kolom foto
+
+
+    public function storeMahasiswa(Request $request)
+    {
+        // Validasi input
+        $request->validate([
+            'nama_lengkap' => 'required|string|max:255',
+            'NIM' => 'required|string|max:20',
+            'foto' => 'nullable|image|mimes:jpeg,png,jpg,gif|max:2048',
         ]);
 
-        return response()->json([
-            'message' => 'Mahasiswa berhasil ditambahkan!',
-            'data' => $member,
-        ], 201);
-    } catch (\Exception $e) {
-        return response()->json([
-            'message' => 'Terjadi kesalahan saat menambahkan mahasiswa',
-            'error' => $e->getMessage(),
-        ], 500);
+        $user = request()->user();
+        if ($user->role != 'admin') {
+            return abort(403);
+        }
+
+        try {
+            // Upload foto jika ada
+            $urlFoto = null;
+            if ($request->hasFile('foto')) {
+                $fotoPath = $request->file('foto')->store('picture_of_student', 'public');
+                $urlFoto = asset(Storage::url($fotoPath)); // full URL ke file
+            }
+
+            // Simpan data anggota ke database dengan URL lengkap
+            $member = Member::create([
+                'nama_lengkap' => $request->nama_lengkap,
+                'NIM' => $request->NIM,
+                'foto' => $urlFoto, // langsung simpan URL lengkap ke kolom foto
+            ]);
+
+            return response()->json([
+                'message' => 'Mahasiswa berhasil ditambahkan!',
+                'data' => $member,
+            ], 201);
+        } catch (\Exception $e) {
+            return response()->json([
+                'message' => 'Terjadi kesalahan saat menambahkan mahasiswa',
+                'error' => $e->getMessage(),
+            ], 500);
+        }
     }
-}
 
 
 
@@ -285,32 +284,41 @@ public function storeMahasiswa(Request $request)
                 'error' => $e->getMessage(),
             ], 500);
         }
-}
+    }
 
 
 
-public function deleteMahasiswa($id)
-{
-    $user= request()->user();
+    public function deleteMahasiswa($id)
+    {
+        $user = request()->user();
         if ($user->role != 'admin') {
             return abort(403);
         }
-    // Cari mahasiswa berdasarkan ID
-    $member = Member::find($id);
-    if (!$member) {
-        return response()->json(['message' => 'Mahasiswa tidak ditemukan!'], 404);
+        try {
+            $member = Member::find($id);
+            if (!$member) {
+                return response()->json(['message' => 'Mahasiswa tidak ditemukan!'], 404);
+            }
+
+            if ($member->projects->count() > 0) {
+                return response()->json(['message' => 'Mahasiswa masih punya project!'], 400);
+            }
+
+            // Hapus foto jika ada
+            if ($member->foto) {
+                Storage::disk('public')->delete($member->foto);
+            }
+
+            // Hapus mahasiswa dari database
+            $member->delete();
+
+            return response()->json(['message' => 'Mahasiswa berhasil dihapus!'], 200);
+        } catch (\Exception $e) {
+            return response()->json([
+                'message' => 'Terjadi kesalahan saat menghapus mahasiswa',
+                'error' => $e->getMessage(),
+            ], 500);
+        }
+        // Cari mahasiswa berdasarkan ID
     }
-
-    // Hapus foto jika ada
-    if ($member->foto) {
-        Storage::disk('public')->delete($member->foto);
-    }
-
-    // Hapus mahasiswa dari database
-    $member->delete();
-
-    return response()->json(['message' => 'Mahasiswa berhasil dihapus!'], 200);
-}
-
-
 }

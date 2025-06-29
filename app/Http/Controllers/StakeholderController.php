@@ -7,6 +7,7 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Storage;
+use Throwable;
 
 class StakeholderController extends Controller
 {
@@ -49,7 +50,7 @@ class StakeholderController extends Controller
         $request->validate([
             'nama' => 'required|string|max:255',
             'kategori' => 'required|in:Internal,Eksternal',
-            'nomor_telepon' => 'required|string|max:15',
+            'nomor_telepon' => 'required|digits_between:10,15',
             'email' => 'required|email',
             'foto' => 'nullable|image|mimes:jpeg,png,jpg,gif|max:2048',
         ]);
@@ -139,11 +140,11 @@ class StakeholderController extends Controller
                 'data' => $stakeholder,
             ], 200);
         } catch (\Exception $e) {
-                return response()->json([
-                    'message' => 'Terjadi kesalahan saat memperbarui stakeholder',
-                    'error' => $e->getMessage(),
-                ], 500);
-            }
+            return response()->json([
+                'message' => 'Terjadi kesalahan saat memperbarui stakeholder',
+                'error' => $e->getMessage(),
+            ], 500);
+        }
     }
 
 
@@ -151,10 +152,10 @@ class StakeholderController extends Controller
 
     public function deleteStakeholder($id)
     {
-        $user= request()->user();
-            if ($user->role != 'admin') {
-                return abort(403);
-            }
+        $user = request()->user();
+        if ($user->role != 'admin') {
+            return abort(403);
+        }
         // Cari stakeholder berdasarkan ID
         $stakeholder = Stakeholder::find($id);
         if (!$stakeholder) {
@@ -164,13 +165,17 @@ class StakeholderController extends Controller
         try {
             // Hapus foto jika ada
             if ($stakeholder->foto) {
-            $oldPath = str_replace(asset('storage') . '/', '', $stakeholder->foto);
-            Storage::disk('public')->delete($oldPath);
-        }
+                $oldPath = str_replace(asset('storage') . '/', '', $stakeholder->foto);
+                Storage::disk('public')->delete($oldPath);
+            }
 
-
+            if ($stakeholder->projects->count() > 0) {
+                throw new \Exception('This stakeholder is still assigned to projects.');
+            }
             // Hapus stakeholder dari database
             $stakeholder->delete();
+
+
 
             return response()->json(['message' => 'Stakeholder berhasil dihapus!'], 200);
         } catch (\Exception $e) {
@@ -180,5 +185,4 @@ class StakeholderController extends Controller
             ], 500);
         }
     }
-
 }

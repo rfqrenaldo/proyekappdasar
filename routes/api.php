@@ -1,15 +1,17 @@
 <?php
+
 use App\Http\Controllers\Auth\SocialiteController;
 use App\Http\Controllers\HomeController;
 use App\Http\Controllers\LoginController;
 use App\Http\Controllers\MahasiswaController;
 use App\Http\Controllers\ProjectController;
 use App\Http\Controllers\StakeholderController;
+use App\Http\Controllers\YearController;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 
 Route::middleware('jwt')->get('/user', function (Request $request) {
-        $user = $request->user();
+    $user = $request->user();
 
     return response()->json([
         'data' => [
@@ -33,10 +35,10 @@ Route::middleware(['jwt'])->group(function () {
     Route::delete('/comments/{comment_id}', [ProjectController::class, 'deleteComment'])->name('api.projects.deleteComment');
     Route::post('/projects/{id}/like', [ProjectController::class, 'likeProject'])->name('api.projects.like');
     Route::get('/projects/{id}/like', [ProjectController::class, 'getLikeStatus'])->name('api.projects.getLikeStatus');
-    Route::post('/mahasiswa/storeMember',[MahasiswaController::class, 'storeMahasiswa'])->name('api.members.store');
+    Route::post('/mahasiswa/storeMember', [MahasiswaController::class, 'storeMahasiswa'])->name('api.members.store');
     Route::put('/mahasiswa/updateMember/{id}', [MahasiswaController::class, 'updateMahasiswa'])->name('api.mahasiswa.update');
     Route::delete('/mahasiswa/deleteMember/{id}', [MahasiswaController::class, 'deleteMahasiswa'])->name('api.mahasiswa.delete');
-    Route::post('/mahasiswa/storeTeamMember',[MahasiswaController::class, 'storeTeamMember'])->name('api.members.storeTeamMember');
+    Route::post('/mahasiswa/storeTeamMember', [MahasiswaController::class, 'storeTeamMember'])->name('api.members.storeTeamMember');
     Route::put('/mahasiswa/updateTeamMember/{id}', [MahasiswaController::class, 'updateTeamMember'])->name('api.members.updateTeamMember');
     Route::delete('/mahasiswa/deleteTeamMember/{id}', [MahasiswaController::class, 'deleteTeamMember'])->name('api.members.deleteTeamMember');
     Route::post('/projects/storeProject', [ProjectController::class, 'storeProject'])->name('api.projects.store');
@@ -45,6 +47,8 @@ Route::middleware(['jwt'])->group(function () {
     Route::post('/stakeholders/storeStakeholders', [StakeholderController::class, 'storeStakeholder'])->name('api.stakeholder.store');
     Route::put('/stakeholders/updateStakeholders/{id}', [StakeholderController::class, 'updateStakeholder'])->name('api.stakeholder.update');
     Route::delete('/stakeholders/deleteStakeholders/{id}', [StakeholderController::class, 'deleteStakeholder'])->name('api.stakeholder.delete');
+    Route::get('/year', [YearController::class, 'getYear'])->name('api.year.list');
+    Route::get('/year/{id}', [YearController::class, 'getYearDetail'])->name('api.year.detail');
 });
 
 // Rute untuk registrasi dan login

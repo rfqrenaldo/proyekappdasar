@@ -105,7 +105,5 @@ class UsersSeeder extends Seeder
             $user['google_token'] = Str::random(40); // <= ini WAJIB supaya error hilang
             User::create($user);
         }
-
-    
     }
 }

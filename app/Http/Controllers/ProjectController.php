@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Http\Requests\StoreProjectRequest;
 use App\Models\Category;
 use App\Models\Comment;
 use App\Models\Image;
@@ -15,6 +16,7 @@ use App\Models\Year;
 use Database\Seeders\TeamMembersSeeder;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Validator;
 use Log;
 use Storage;
 
@@ -39,7 +41,7 @@ class ProjectController extends Controller
         ]);
     }
 
-   public function DetailProject(int $id)
+    public function DetailProject(int $id)
     {
         try {
             // Eager loading semua relasi berdasarkan definisi di model Anda
@@ -65,7 +67,6 @@ class ProjectController extends Controller
                 'status' => 'success',
                 'data' => $project,
             ], 200);
-
         } catch (\Illuminate\Database\Eloquent\ModelNotFoundException $e) {
             // Tangani jika proyek tidak ditemukan
             return response()->json([
@@ -120,7 +121,8 @@ class ProjectController extends Controller
 
     public function storeProject(Request $request)
     {
-        $request->validate([
+
+        $validator = Validator::make($request->all(), [
             'nama_proyek' => 'required|string|max:255',
             'stakeholder_id' => 'required|exists:stakeholders,id',
             'team_id' => 'required|exists:teams,id',
@@ -129,8 +131,15 @@ class ProjectController extends Controller
             'category_project' => 'required|exists:categories,id',
             'link_proyek' => 'nullable|string',
             'images' => 'nullable|array',
-            'images.*' => 'image|mimes:jpeg,png,jpg,gif,webp|max:2048',
-        ]);
+            'images.*' => 'image|mimes:jpeg,png,jpg,gif,webp|max:4096',
+        ], ['images.*' => 'Each image must not be larger than 4 MB.']);
+
+        if ($validator->fails()) {
+            return response()->json([
+                'message' => "Check your input",
+                'error' => $validator->messages(),
+            ], 400);
+        }
 
         $user = request()->user();
         if ($user->role != 'admin') {
@@ -175,21 +184,20 @@ class ProjectController extends Controller
                 'message' => 'Project berhasil ditambahkan',
                 'project' => $project->load(['image', 'categories']),
             ], 201);
-
         } catch (\Exception $e) {
             return response()->json([
                 'message' => 'Terjadi kesalahan saat menyimpan project',
                 'error' => $e->getMessage(),
             ], 500);
         }
-}
+    }
 
 
 
 
 
     public function updateProject(Request $request, $id)
-        {
+    {
         $request->validate([
             'nama_proyek' => 'required|string|max:255',
             'stakeholder_id' => 'required|exists:stakeholders,id',
@@ -256,7 +264,7 @@ class ProjectController extends Controller
     }
 
 
-        public function deleteProject($project_id)
+    public function deleteProject($project_id)
     {
         $user = request()->user();
         if ($user->role != 'admin') {
@@ -299,7 +307,7 @@ class ProjectController extends Controller
             'be' => 'required|exists:anggotas,id',
             'ui_ux' => 'required|exists:anggotas,id',
         ]);
-        $user= request()->user();
+        $user = request()->user();
         if ($user->role != 'admin') {
             return abort(403);
         }
@@ -352,7 +360,7 @@ class ProjectController extends Controller
         $project = Project::findOrFail($id);
 
         // Simpan komentar ke dalam tabel `comments`
-        $comment= $project->comments()->create([
+        $comment = $project->comments()->create([
             'isi_komen' => $request->comment,
             'user_id' => request()->user()->id, // Menggunakan ID pengguna yang sedang login
         ]);
@@ -366,8 +374,8 @@ class ProjectController extends Controller
     public function deleteComment($comment_id)
     {
         $comment = Comment::findOrFail($comment_id);
-        $user= request()->user();
-        if ($user->role != 'admin'&&$comment->user_id != $user->id) {
+        $user = request()->user();
+        if ($user->role != 'admin' && $comment->user_id != $user->id) {
             return response()->json([
                 'message' => 'Hanya admin yang dapat menghapus komentar'
             ], 403);
@@ -438,14 +446,14 @@ class ProjectController extends Controller
             ]);
         }
     }
-   public function getLikeStatus($id)
+    public function getLikeStatus($id)
     {
         // Temukan proyek berdasarkan ID
         $project = Project::findOrFail($id);
 
         // Cek apakah pengguna sudah menyukai proyek ini
         $like = $project->likes()->where('user_id', request()->user()->id)->first();
-        
+
 
         return response()->json([
             'liked' => $like ? true : false,
@@ -463,5 +471,4 @@ class ProjectController extends Controller
             'likes_count' => $likesCount,
         ]);
     }
-
 }

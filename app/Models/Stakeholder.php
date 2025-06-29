@@ -10,7 +10,8 @@ class Stakeholder extends Model
     use HasFactory;
     protected $table = 'stakeholders';
     protected $guarded = [];
-    public function projects(){
+    public function projects()
+    {
         return $this->hasMany(Project::class, 'stakeholder_id');
     }
 }

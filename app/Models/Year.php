@@ -9,8 +9,9 @@ class Year extends Model
 {
 
     use HasFactory;
-    protected $guarded =[];
-    public function project(){
+    protected $guarded = [];
+    public function project()
+    {
         return $this->belongsTo(Project::class);
     }
 }
