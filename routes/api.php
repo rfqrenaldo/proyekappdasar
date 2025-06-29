@@ -76,6 +76,7 @@ Route::get('/stakeholders/search/{keyword}', [StakeholderController::class, 'sea
 
 
 // Rute API tim dan anggota
+Route::get('/teams', [ProjectController::class, 'ListTeam'])->name('api.teams.list');
 Route::get('/teams/{id}', [ProjectController::class, 'DetailTeam'])->name('api.teams.detail');
 Route::get('/members/{id}', [ProjectController::class, 'DetailMember'])->name('api.members.detail');
 

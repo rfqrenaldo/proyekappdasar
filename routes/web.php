@@ -1,11 +1,9 @@
 <?php
+
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\Auth\SocialiteController;
-use App\Http\Controllers\DashboardController;
 
-Route::get('/', function () {
-    return view('welcome');
-});
+Route::redirect('/', '/docs/api');
 
 // Rute untuk Google OAuth
 Route::get('/auth/redirect', [SocialiteController::class, 'redirect']);

@@ -41,6 +41,15 @@ class ProjectController extends Controller
         ]);
     }
 
+    public function ListTeam()
+    {
+        $teams = Team::with(['project', 'project.image', 'team_member.member'])->get();
+        return response()->json([
+            'status' => 'success',
+            'data' => $teams
+        ]);
+    }
+
     public function DetailProject(int $id)
     {
         try {
