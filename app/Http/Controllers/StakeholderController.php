@@ -44,7 +44,7 @@ class StakeholderController extends Controller
             'nomor_telepon' => 'required|digits_between:10,15',
             'email' => 'required|email',
             'foto' => 'nullable|image|mimes:jpeg,png,jpg,gif|max:4096',
-        ], ['foto' => 'Each image must not be larger than 4 MB.']);
+        ], ['foto.max' => 'Each image must not be larger than 4 MB.']);
 
         $validator->stopOnFirstFailure();
         if ($validator->fails()) {
@@ -89,7 +89,7 @@ class StakeholderController extends Controller
             'nomor_telepon' => 'required|digits_between:10,15|max:15',
             'email' => 'required|email|max:255',
             'foto' => 'nullable|image|mimes:jpeg,png,jpg,gif|max:4096',
-        ], ['foto' => 'Each image must not be larger than 4 MB.']);
+        ], ['foto.max' => 'Each image must not be larger than 4 MB.']);
 
         $validator->stopOnFirstFailure();
         if ($validator->fails()) {

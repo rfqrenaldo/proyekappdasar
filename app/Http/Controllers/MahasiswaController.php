@@ -201,7 +201,7 @@ class MahasiswaController extends Controller
             'nama_lengkap' => 'required|string|max:255',
             'NIM' => 'required|string|max:20',
             'foto' => 'nullable|image|mimes:jpeg,png,jpg,gif|max:4096',
-        ], ['images.*' => 'Each image must not be larger than 4 MB.']);
+        ], ['foto.max' => 'Each image must not be larger than 4 MB.']);
 
 
 
@@ -245,7 +245,7 @@ class MahasiswaController extends Controller
             'nama_lengkap' => 'required|string|max:255',
             'NIM' => 'required|string|max:20',
             'foto' => 'nullable|image|mimes:jpeg,png,jpg,gif|max:4096',
-        ], ['images.*' => 'Each image must not be larger than 4 MB.']);
+        ], ['foto.max' => 'Each image must not be larger than 4 MB.']);
 
         $validator->stopOnFirstFailure();
         if ($validator->fails()) {

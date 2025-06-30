@@ -173,7 +173,7 @@ class ProjectController extends Controller
             'link_proyek' => 'nullable|string',
             'images' => 'nullable|array',
             'images.*' => 'image|mimes:jpeg,png,jpg,gif,webp|max:4096',
-        ], ['foto' => 'Each image must not be larger than 4 MB.']);
+        ], ['images' => 'Each image must not be larger than 4 MB.']);
 
         $validator->stopOnFirstFailure();
         if ($validator->fails()) {
