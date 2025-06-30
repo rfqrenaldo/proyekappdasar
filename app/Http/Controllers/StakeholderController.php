@@ -86,7 +86,7 @@ class StakeholderController extends Controller
         $validator = Validator::make($request->all(), [
             'nama' => 'required|string|max:255',
             'kategori' => 'required|in:Internal,Eksternal',
-            'nomor_telepon' => 'required|string|max:15',
+            'nomor_telepon' => 'required|digits_between:10,15|max:15',
             'email' => 'required|email|max:255',
             'foto' => 'nullable|image|mimes:jpeg,png,jpg,gif|max:4096',
         ], ['foto' => 'Each image must not be larger than 4 MB.']);
