@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Helper\ResponseHelper;
 use App\Models\Project;
 use Illuminate\Http\Request;
 
@@ -29,10 +30,11 @@ class HomeController extends Controller
 
         $projects = $query->with(['categories', 'year', 'stakeholder', 'team', 'image'])->get();
 
-        return response()->json([
-            'status' => 'success',
-            'data' => $projects
-        ]);
+        // return response()->json([
+        //     'status' => 'success',
+        //     'data' => $projects
+        // ]);
+        return ResponseHelper::send('Berhasil mendapatkan filter data project', $projects, 200);
     }
 
     // Method to display all projects without filtering
@@ -41,9 +43,10 @@ class HomeController extends Controller
         // Get all projects without any filter
         $projects = Project::with(['categories', 'year', 'stakeholder', 'team', 'image'])->get();
 
-        return response()->json([
-            'status' => 'success',
-            'data' => $projects
-        ]);
+        // return response()->json([
+        //     'status' => 'success',
+        //     'data' => $projects
+        // ]);
+        return ResponseHelper::send('Berhasil mendapatkan data project', $projects, 200);
     }
 }

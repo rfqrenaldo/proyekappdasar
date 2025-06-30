@@ -2,11 +2,13 @@
 
 namespace App\Http\Controllers;
 
+use App\Helper\ResponseHelper;
 use App\Models\Stakeholder;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Storage;
+use Illuminate\Support\Facades\Validator;
 use Throwable;
 
 class StakeholderController extends Controller
@@ -16,12 +18,7 @@ class StakeholderController extends Controller
     {
         // Ambil semua stakeholder dengan relasi projects
         $stakeholders = Stakeholder::with(['projects'])->get();
-
-        // Kembalikan data sebagai JSON
-        return response()->json([
-            'status' => 'success',
-            'data' => $stakeholders,
-        ]);
+        return ResponseHelper::send('Berhasil mendapatkan semua data stakeholder', $stakeholders);
     }
 
     public function searchStakeholder($keyword)
@@ -31,33 +28,30 @@ class StakeholderController extends Controller
             ->get();
 
         if ($stakeholder->isEmpty()) {
-            return response()->json([
-                'status' => 'error',
-                'message' => 'Nama Stakeholder tidak ditemukan'
-            ]);
+            return ResponseHelper::send('Stakeholder tidak ditemukan', null, 404);
         }
-
-        return response()->json([
-            'status' => 'success',
-            'data' => $stakeholder
-        ]);
+        return ResponseHelper::send('Stakeholder berhasil ditemukan', $stakeholder, 200);
     }
 
 
     public function storeStakeholder(Request $request)
     {
         // Validasi input
-        $request->validate([
+        $validator = Validator::make($request->all(), [
             'nama' => 'required|string|max:255',
             'kategori' => 'required|in:Internal,Eksternal',
             'nomor_telepon' => 'required|digits_between:10,15',
             'email' => 'required|email',
-            'foto' => 'nullable|image|mimes:jpeg,png,jpg,gif|max:2048',
-        ]);
+            'foto' => 'nullable|image|mimes:jpeg,png,jpg,gif|max:4096',
+        ], ['foto' => 'Each image must not be larger than 4 MB.']);
+
+        if ($validator->fails()) {
+            return ResponseHelper::send('Check your input', $validator->messages(), 400);
+        }
 
         $user = request()->user();
         if ($user->role != 'admin') {
-            return abort(403);
+            return ResponseHelper::send('Unauthorized', null, 403);
         }
 
         try {
@@ -76,16 +70,9 @@ class StakeholderController extends Controller
                 'email' => $request->email,
                 'foto' => $urlFoto, // Simpan sebagai URL
             ]);
-
-            return response()->json([
-                'message' => 'Stakeholder berhasil ditambahkan!',
-                'data' => $stakeholder,
-            ], 201);
+            return ResponseHelper::send('Stakeholder berhasil ditambahkan', $stakeholder, 201);
         } catch (\Exception $e) {
-            return response()->json([
-                'message' => 'Terjadi kesalahan saat menambahkan stakeholder',
-                'error' => $e->getMessage(),
-            ], 500);
+            return ResponseHelper::send('Stakeholder gagal ditambahkan', $e->getMessage(), 400);
         }
     }
 
@@ -94,23 +81,27 @@ class StakeholderController extends Controller
     public function updateStakeholder(Request $request, $id)
     {
         // Validasi input
-        $request->validate([
+        $validator = Validator::make($request->all(), [
             'nama' => 'required|string|max:255',
             'kategori' => 'required|in:Internal,Eksternal',
             'nomor_telepon' => 'required|string|max:15',
             'email' => 'required|email|max:255',
-            'foto' => 'nullable|image|mimes:jpeg,png,jpg,gif|max:2048',
-        ]);
+            'foto' => 'nullable|image|mimes:jpeg,png,jpg,gif|max:4096',
+        ], ['foto' => 'Each image must not be larger than 4 MB.']);
+
+        if ($validator->fails()) {
+            return ResponseHelper::send('Check your input', $validator->messages(), 400);
+        }
 
         $user = request()->user();
         if ($user->role != 'admin') {
-            return abort(403);
+            return ResponseHelper::send('Unauthorized', null, 403);
         }
 
         // Cari stakeholder berdasarkan ID
         $stakeholder = Stakeholder::find($id);
         if (!$stakeholder) {
-            return response()->json(['message' => 'Stakeholder tidak ditemukan'], 404);
+            return ResponseHelper::send('Stakeholder tidak ditemukan', null, 404);
         }
 
         try {
@@ -135,15 +126,9 @@ class StakeholderController extends Controller
             $stakeholder->email = $request->email;
             $stakeholder->save();
 
-            return response()->json([
-                'message' => 'Stakeholder berhasil diperbarui!',
-                'data' => $stakeholder,
-            ], 200);
+            return ResponseHelper::send('Stakeholder berhasil diperbarui', $stakeholder, 200);
         } catch (\Exception $e) {
-            return response()->json([
-                'message' => 'Terjadi kesalahan saat memperbarui stakeholder',
-                'error' => $e->getMessage(),
-            ], 500);
+            return ResponseHelper::send('Stakeholder gagal diperbarui', $e->getMessage(), 400);
         }
     }
 
@@ -154,12 +139,12 @@ class StakeholderController extends Controller
     {
         $user = request()->user();
         if ($user->role != 'admin') {
-            return abort(403);
+            return ResponseHelper::send('Unauthorized', null, 403);
         }
         // Cari stakeholder berdasarkan ID
         $stakeholder = Stakeholder::find($id);
         if (!$stakeholder) {
-            return response()->json(['message' => 'Stakeholder tidak ditemukan!'], 404);
+            return ResponseHelper::send('Stakeholder tidak ditemukan', null, 404);
         }
 
         try {
@@ -170,19 +155,13 @@ class StakeholderController extends Controller
             }
 
             if ($stakeholder->projects->count() > 0) {
-                throw new \Exception('This stakeholder is still assigned to projects.');
+                throw new \Exception('Stakeholder masih memiliki project');
             }
             // Hapus stakeholder dari database
             $stakeholder->delete();
-
-
-
-            return response()->json(['message' => 'Stakeholder berhasil dihapus!'], 200);
+            return ResponseHelper::send('Stakeholder berhasil dihapus', null, 200);
         } catch (\Exception $e) {
-            return response()->json([
-                'message' => 'Terjadi kesalahan saat menghapus stakeholder',
-                'error' => $e->getMessage(),
-            ], 500);
+            return ResponseHelper::send('Stakeholder gagal dihapus', $e->getMessage(), 400);
         }
     }
 }

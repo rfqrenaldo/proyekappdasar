@@ -2,8 +2,7 @@
 
 namespace App\Http\Controllers;
 
-use App\Http\Requests\StoreProjectRequest;
-use App\Models\Category;
+use App\Helper\ResponseHelper;
 use App\Models\Comment;
 use App\Models\Image;
 use App\Models\Member;
@@ -13,7 +12,6 @@ use App\Models\Stakeholder;
 use App\Models\Team;
 use App\Models\Team_member;
 use App\Models\Year;
-use Database\Seeders\TeamMembersSeeder;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Validator;
@@ -28,26 +26,17 @@ class ProjectController extends Controller
         $projects = Project::with(['image'])->where('nama_proyek', 'like', '%' . $keyword . '%')->get();
 
         if ($projects->isEmpty()) {
-            return response()->json([
-                'status' => 'error',
-                'message' => 'Proyek tidak ditemukan'
-            ]);
+            return ResponseHelper::send('Proyek tidak ditemukan', null, 404);
         }
 
         // Mengembalikan respons JSON
-        return response()->json([
-            'status' => 'success',
-            'data' => $projects
-        ]);
+        return ResponseHelper::send('Proyek berhasil ditemukan', $projects, 200);
     }
 
     public function ListTeam()
     {
         $teams = Team::with(['project', 'project.image', 'team_member.member'])->get();
-        return response()->json([
-            'status' => 'success',
-            'data' => $teams
-        ]);
+        return ResponseHelper::send('Berhasil mendapatkan semua data tim', $teams, 200);
     }
 
     public function DetailProject(int $id)
@@ -72,23 +61,12 @@ class ProjectController extends Controller
             // - $project->categories akan menjadi Collection of Category models (karena belongsToMany)
             // - $project->team->team_member akan menjadi Collection of Team_member models (karena hasMany)
 
-            return response()->json([
-                'status' => 'success',
-                'data' => $project,
-            ], 200);
+            return ResponseHelper::send('Berhasil mendapatkan data proyek', $project, 200);
         } catch (\Illuminate\Database\Eloquent\ModelNotFoundException $e) {
             // Tangani jika proyek tidak ditemukan
-            return response()->json([
-                'status' => 'error',
-                'message' => 'Proyek tidak ditemukan.',
-            ], 404);
+            return ResponseHelper::send('Proyek tidak ditemukan', null, 404);
         } catch (\Exception $e) {
-            // Tangani error umum lainnya
-            return response()->json([
-                'status' => 'error',
-                'message' => 'Terjadi kesalahan saat mengambil detail proyek: ' . $e->getMessage(),
-                'error_code' => $e->getCode(),
-            ], 500);
+            return ResponseHelper::send('Gagal mendapatkan data proyek', $e->getMessage(), 400);
         }
     }
     public function DetailStakeholder($id)
@@ -96,14 +74,7 @@ class ProjectController extends Controller
         //jika stakeholder dipencet dapat melihat detail stakeholdernya
         // Ambil detail stakeholder berdasarkan ID tanpa eager loading di model
         $stakeholder = Stakeholder::with('projects', 'projects.image')->findOrFail($id);
-
-        // Ambil proyek terkait dengan stakeholder
-        $projects = $stakeholder->projects()->get();
-
-        return response()->json([
-            'status' => 'success',
-            'data' => $stakeholder,
-        ]);
+        return ResponseHelper::send('Berhasil mendapatkan data stakeholder', $stakeholder, 200);
     }
 
     public function DetailTeam($id)
@@ -111,21 +82,14 @@ class ProjectController extends Controller
         // jika team dipencet maka akan muncul nama nama membernya//
         // Ambil detail tim berdasarkan ID tanpa eager loading di model
         $team = Team::with(['team_member', 'team_member.member', 'project', 'project.image'])->findOrFail($id);
-
-        return response()->json([
-            'status' => 'success',
-            'data' => $team,
-        ]);
+        return ResponseHelper::send('Berhasil mendapatkan data tim', $team, 200);
     }
 
     public function DetailMember($id)
     {
         // jika member dipencet maka akan muncul detail membernya
         $member = Member::with('projects', 'projects.image')->findOrFail($id);
-        return response()->json([
-            'status' => 'success',
-            'data' => $member,
-        ]);
+        return ResponseHelper::send('Berhasil mendapatkan data anggota', $member, 200);
     }
 
     public function storeProject(Request $request)
@@ -144,15 +108,12 @@ class ProjectController extends Controller
         ], ['images.*' => 'Each image must not be larger than 4 MB.']);
 
         if ($validator->fails()) {
-            return response()->json([
-                'message' => "Check your input",
-                'error' => $validator->messages(),
-            ], 400);
+            return ResponseHelper::send("Check your input", $validator->messages(), 400);
         }
 
         $user = request()->user();
         if ($user->role != 'admin') {
-            return abort(403);
+            return ResponseHelper::send("Unauthorized", null, 403);
         }
 
         try {
@@ -188,16 +149,9 @@ class ProjectController extends Controller
                     ]);
                 }
             }
-
-            return response()->json([
-                'message' => 'Project berhasil ditambahkan',
-                'project' => $project->load(['image', 'categories']),
-            ], 201);
+            return ResponseHelper::send('Berhasil menambahkan data proyek', $project->load(['image', 'categories']), 201);
         } catch (\Exception $e) {
-            return response()->json([
-                'message' => 'Terjadi kesalahan saat menyimpan project',
-                'error' => $e->getMessage(),
-            ], 500);
+            return ResponseHelper::send('Gagal menambahkan data proyek', $e->getMessage(), 400);
         }
     }
 
@@ -207,7 +161,7 @@ class ProjectController extends Controller
 
     public function updateProject(Request $request, $id)
     {
-        $request->validate([
+        $validator = Validator::make($request->all(), [
             'nama_proyek' => 'required|string|max:255',
             'stakeholder_id' => 'required|exists:stakeholders,id',
             'team_id' => 'required|exists:teams,id',
@@ -216,12 +170,16 @@ class ProjectController extends Controller
             'category_project' => 'required|exists:categories,id',
             'link_proyek' => 'nullable|string',
             'images' => 'nullable|array',
-            'images.*' => 'image|mimes:jpeg,png,jpg,gif,webp|max:2048',
-        ]);
+            'images.*' => 'image|mimes:jpeg,png,jpg,gif,webp|max:4096',
+        ], ['foto' => 'Each image must not be larger than 4 MB.']);
+
+        if ($validator->fails()) {
+            return ResponseHelper::send('Check your input', $validator->messages(), 400);
+        }
 
         $user = request()->user();
         if ($user->role != 'admin') {
-            return abort(403);
+            return ResponseHelper::send('Unauthorized', null, 403);
         }
 
         $project = Project::findOrFail($id);
@@ -265,11 +223,7 @@ class ProjectController extends Controller
             ['project_id' => $project->id],
             ['tahun' => $request->year]
         );
-
-        return response()->json([
-            'message' => 'Project berhasil diperbarui',
-            'project' => $project->load('image', 'categories')
-        ], 200);
+        return ResponseHelper::send('Project berhasil diperbarui', $project->load('image', 'categories'), 200);
     }
 
 
@@ -277,7 +231,7 @@ class ProjectController extends Controller
     {
         $user = request()->user();
         if ($user->role != 'admin') {
-            return abort(403);
+            return ResponseHelper::send('Unauthorized', null, 403);
         }
 
         $project = Project::findOrFail($project_id);
@@ -297,28 +251,25 @@ class ProjectController extends Controller
 
         // Hapus proyek
         $project->delete();
-
-        return response()->json([
-            'message' => 'Project berhasil dihapus'
-        ], 200);
+        return ResponseHelper::send('Project berhasil dihapus', null, 200);
     }
-
-
-
 
     public function storeTeam(Request $request)
     {
         // Validasi input
-        $request->validate([
+        $validator = Validator::make($request->all(), [
             'nama_tim' => 'required|string|max:255|unique:teams,nama_tim',
             'pm' => 'required|exists:anggotas,id',
             'fe' => 'required|exists:anggotas,id',
             'be' => 'required|exists:anggotas,id',
             'ui_ux' => 'required|exists:anggotas,id',
         ]);
+        if ($validator->fails()) {
+            return ResponseHelper::send('Check your input', $validator->messages(), 400);
+        }
         $user = request()->user();
         if ($user->role != 'admin') {
-            return abort(403);
+            return ResponseHelper::send('Unauthorized', null, 403);
         }
 
         try {
@@ -349,21 +300,24 @@ class ProjectController extends Controller
 
             // Commit transaksi jika semua proses sukses
             DB::commit();
-
-            return redirect()->back()->with('success', 'Tim berhasil dibuat!');
+            $data = Team::with(['team_member.member', 'project'])->find($team->id);
+            return ResponseHelper::send('Berhasil menambahkan data tim', $data, 201);
         } catch (\Exception $e) {
             // Rollback jika terjadi kesalahan
             DB::rollBack();
-            return redirect()->back()->with('error', 'Gagal membuat tim: ' . $e->getMessage());
+            return ResponseHelper::send('Gagal menambahkan data tim', $e->getMessage(), 400);
         }
     }
 
     public function commentProject(Request $request, $id)
     {
         // Validasi input
-        $request->validate([
+        $validator = Validator::make($request->all(), [
             'comment' => 'required|string|max:255',
         ]);
+        if ($validator->fails()) {
+            return ResponseHelper::send('Check your input', $validator->messages(), 400);
+        }
 
         // Temukan proyek berdasarkan ID
         $project = Project::findOrFail($id);
@@ -373,11 +327,7 @@ class ProjectController extends Controller
             'isi_komen' => $request->comment,
             'user_id' => request()->user()->id, // Menggunakan ID pengguna yang sedang login
         ]);
-
-        return response()->json([
-            'message' => 'Komentar berhasil ditambahkan',
-            'comment' => $comment
-        ], 201);
+        return ResponseHelper::send('Komentar berhasil ditambahkan', $comment, 201);
     }
 
     public function deleteComment($comment_id)
@@ -385,18 +335,13 @@ class ProjectController extends Controller
         $comment = Comment::findOrFail($comment_id);
         $user = request()->user();
         if ($user->role != 'admin' && $comment->user_id != $user->id) {
-            return response()->json([
-                'message' => 'Hanya admin yang dapat menghapus komentar'
-            ], 403);
+            return ResponseHelper::send('Unauthorized', null, 403);
         }
         // Temukan komentar berdasarkan ID
 
         // Hapus komentar
         $comment->delete();
-
-        return response()->json([
-            'message' => 'Komentar berhasil dihapus'
-        ], 200);
+        return ResponseHelper::send('Komentar berhasil dihapus', null, 200);
     }
     public function getComments($id)
     {
@@ -405,10 +350,7 @@ class ProjectController extends Controller
 
         // Ambil semua komentar untuk proyek ini
         $comments = $project->comments()->with('user')->get();
-
-        return response()->json([
-            'comments' => $comments,
-        ]);
+        return ResponseHelper::send('Berhasil mendapatkan semua data komentar', $comments, 200);
     }
     public function searchTeam($keyword)
     {
@@ -416,17 +358,11 @@ class ProjectController extends Controller
         $teams = Team::with(['team_member.member'])->where('nama_tim', 'like', '%' . $keyword . '%')->get();
 
         if ($teams->isEmpty()) {
-            return response()->json([
-                'status' => 'error',
-                'message' => 'Tim tidak ditemukan'
-            ]);
+            return ResponseHelper::send('Tim tidak ditemukan', null, 404);
         }
 
         // Mengembalikan respons JSON
-        return response()->json([
-            'status' => 'success',
-            'data' => $teams
-        ]);
+        return ResponseHelper::send('Berhasil mendapatkan data tim', $teams, 200);
     }
 
     public function likeProject($id)
@@ -440,19 +376,13 @@ class ProjectController extends Controller
         if ($like) {
             // Jika sudah, hapus like
             $like->delete();
-            return response()->json([
-                'message' => 'Like dihapus',
-                'status' => 'unliked'
-            ]);
+            return ResponseHelper::send('Berhasil unlike proyek', ['status' => 'unliked'], 200);
         } else {
             // Jika belum, tambahkan like
             $project->likes()->create([
                 'user_id' => request()->user()->id,
             ]);
-            return response()->json([
-                'message' => 'Proyek disukai',
-                'status' => 'liked'
-            ]);
+            return ResponseHelper::send('Berhasil like proyek', ['status' => 'liked'], 200);
         }
     }
     public function getLikeStatus($id)

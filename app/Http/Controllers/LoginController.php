@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Helper\ResponseHelper;
 use App\Http\Controllers\Controller;
 use App\Http\Resources\RegisterResource;
 use Illuminate\Http\Request;
@@ -9,13 +10,12 @@ use Illuminate\Support\Facades\Auth;
 use App\Models\User;
 use Illuminate\Support\Facades\Validator;
 use Firebase\JWT\JWT;
-use Firebase\JWT\Key;
+use Response;
 
 class LoginController extends Controller
 {
     public function login(Request $request)
     {
-        // Validasi input
         $validator = Validator::make($request->all(), [
             'email' => 'required|string',
             'password' => 'required',
@@ -28,11 +28,9 @@ class LoginController extends Controller
             ], 400);
         }
 
-        // Cek kredensial
         if (Auth::attempt($request->only('email', 'password'))) {
             $user = Auth::user();
 
-            // === JWT creation ===
             $payload = [
                 'iss' => 'simapro', // Issuer (optional)
                 'sub' => $user->id,       // Subject (user ID)
@@ -46,16 +44,24 @@ class LoginController extends Controller
             $token = JWT::encode($payload, env('JWT_SECRET'), 'HS256');
 
             // Response
-            return response()->json([
-                'status' => 'true',
-                'data' => [
-                    'id' => $user->id,
-                    'email' => $user->email,
-                    'name' => $user->name,
-                    'role' => $user->role,
-                    'token' => $token,
-                ]
-            ])->withCookie(cookie('token', $token, 60 * 48, '/', null, true, true));;
+            // return response()->json([
+            //     'status' => 'true',
+            //     'data' => [
+            //         'id' => $user->id,
+            //         'email' => $user->email,
+            //         'name' => $user->name,
+            //         'role' => $user->role,
+            //         'token' => $token,
+            //     ]
+            // ])->withCookie(cookie('token', $token, 60 * 48, '/', null, true, true));;
+            $data = [
+                'id' => $user->id,
+                'email' => $user->email,
+                'name' => $user->name,
+                'role' => $user->role,
+                'token' => $token,
+            ];
+            return ResponseHelper::send('Success login', $data, 200);
         } else {
             return response()->json([
                 'status' => 'false',
@@ -91,12 +97,14 @@ class LoginController extends Controller
             'password' => bcrypt($request->input('password')), // Enkripsi password
         ]);
 
-        $data = [
-            'status' => 'true',
-            'data' => [
-                'messages' => new RegisterResource($user),
-            ],
-        ];
-        return response()->json($data, 201);
+        // $data = [
+        //     'status' => 'true',
+        //     'data' => [
+        //         'messages' => new RegisterResource($user),
+        //     ],
+        // ];
+        // return response()->json($data, 201);
+        $data = new RegisterResource($user);
+        return ResponseHelper::send('Success login', $data, 200);
     }
 }

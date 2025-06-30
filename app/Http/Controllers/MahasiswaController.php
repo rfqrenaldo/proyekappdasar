@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Helper\ResponseHelper;
 use App\Models\Member;
 use App\Models\Project;
 use App\Models\Team;
@@ -9,6 +10,7 @@ use App\Models\Team_member;
 use DB;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
+use Illuminate\Support\Facades\Validator;
 
 class MahasiswaController extends Controller
 {
@@ -19,11 +21,7 @@ class MahasiswaController extends Controller
         //jika navbar mahasiswa dipencet dapat melihat semua mahasiswa (mahasiswa adalah member dari team)dan jika mahasiswa dipencet dapat memunculkan project yang dimiliki mahasiswa tersebut
         // Get all projects without any filter
         $member = Member::with(['Team_member'])->get();
-
-        return response()->json([
-            'status' => 'success',
-            'data' => $member
-        ]);
+        return ResponseHelper::send('Sukses mendapatkan data semua anggota', $member);
     }
 
 
@@ -33,26 +31,16 @@ class MahasiswaController extends Controller
 
         $mhs = Member::with('team_member')->where('nama_lengkap', 'like', '%' . $keyword . '%')->get();
         if ($mhs->isEmpty()) {
-            return response()->json([
-                'status' => 'error',
-                'message' => 'Nama member atau mahasiswa tidak ditemukan'
-            ]);
+            return ResponseHelper::send('Nama member atau mahasiswa tidak ditemukan', null, 404);
         }
-        return response()->json([
-            'status' => 'success',
-            'data' => $mhs
-        ]);
+        return ResponseHelper::send('Nama member atau mahasiswa tidak ditemukan', $mhs, 200);
     }
 
 
     public function DetailMahasiswa($id)
     {
         $member = Member::with(['projects', 'projects.image'])->find($id);
-
-        return response()->json([
-            'status' => 'success',
-            'data' => $member
-        ]);
+        return ResponseHelper::send('Sukses mendapatkan detail mahasiswa', $member, 200);
     }
 
     //untuk form add team
@@ -61,14 +49,17 @@ class MahasiswaController extends Controller
 
         // Validasi input
         $anggotas = [];
-        $request->validate([
+        $validator = Validator::make($request->all(), [
             'nama_tim' => 'required|string|max:255',
             'member_*' => 'required|exists:anggotas,id',
-
         ]);
+
+        if ($validator->fails()) {
+            return ResponseHelper::send('Check your input', $validator->messages(), 400);
+        }
         $user = request()->user();
         if ($user->role != 'admin') {
-            return abort(403);
+            return ResponseHelper::send('Unauthorized', null, 403);
         }
 
         $team = Team::create([
@@ -85,36 +76,31 @@ class MahasiswaController extends Controller
             $anggotas[] = $anggota;
         }
 
-        // Simpan data ke tabel anggota_teams
-
-
-        return response()->json([
-            'message' => 'Anggota berhasil ditambahkan ke tim!',
-            'data' => $anggotas
-        ], 201);
+        return ResponseHelper::send('Anggota berhasil ditambahkan ke tim!', $anggotas, 201);
     }
 
     public function updateTeamMember(Request $request, $id)
     {
         // 1. Validasi Input
         $anggotas = []; // Inisialisasi array untuk anggota yang diperbarui
-        $request->validate([
+        $validator = Validator::make($request->all(), [
             'nama_tim' => 'sometimes|string|max:255|unique:teams,nama_tim,' . $id,
             'member_*' => 'sometimes|exists:anggotas,id', // 'sometimes' agar opsional untuk update
         ]);
+        if ($validator->fails()) {
+            return ResponseHelper::send('Check your input', $validator->messages(), 400);
+        }
 
         // 2. Periksa Hak Akses (Hanya Admin)
         $user = request()->user();
         if ($user->role != 'admin') {
-            return abort(403, 'Unauthorized access.');
+            return ResponseHelper::send('Unauthorized', null, 403);
         }
 
         // 3. Temukan Tim yang Akan Diupdate
         $team = Team::find($id);
         if (!$team) {
-            return response()->json([
-                'message' => 'Tim tidak ditemukan.'
-            ], 404);
+            return ResponseHelper::send('Tim tidak ditemukan', null, 404);
         }
 
         // 4. Update Nama Tim (Jika Ada di Request)
@@ -158,17 +144,17 @@ class MahasiswaController extends Controller
         // Muat ulang anggota tim untuk memastikan data terbaru terkirim dalam respons
         $updatedTeamMembers = Team_member::where('team_id', $team->id)->get();
 
-        return response()->json([
-            'message' => 'Tim dan anggotanya berhasil diperbarui!',
+        $data = [
             'team' => $team,
             'members' => $updatedTeamMembers // Kirim data anggota tim yang diperbarui
-        ], 200);
+        ];
+        return ResponseHelper::send('Tim dan anggotanya berhasil diperbarui!', $data, 200);
     }
     public function deleteTeamMember(int $id)
     {
         $user = request()->user();
         if ($user->role != 'admin') {
-            return abort(403, 'Unauthorized access.');
+            return ResponseHelper::send('Unauthorized', null, 403);
         }
 
         try {
@@ -176,19 +162,16 @@ class MahasiswaController extends Controller
             $team = Team::find($id);
             if (!$team) {
                 DB::rollBack();
-                return response()->json(['message' => 'Tim tidak ditemukan.'], 404);
+                return ResponseHelper::send('Tim tidak ditemukan.', null, 404);
             }
 
             $team->delete(); // Ini saja sudah cukup! Database akan menghapus anggota_teams.
 
             DB::commit();
-            return response()->json(['message' => 'Tim dan semua anggotanya berhasil dihapus!'], 200);
+            return ResponseHelper::send('Tim dan semua anggotanya berhasil dihapus!', null, 200);
         } catch (\Exception $e) {
             DB::rollBack();
-            return response()->json([
-                'message' => 'Gagal menghapus tim: ' . $e->getMessage(),
-                'error_code' => $e->getCode()
-            ], 500);
+            return ResponseHelper::send('Tim dan semua anggotanya gagal dihapus!', $e->getMessage(), 500);
         }
     }
 
@@ -198,15 +181,21 @@ class MahasiswaController extends Controller
     public function storeMahasiswa(Request $request)
     {
         // Validasi input
-        $request->validate([
+        $validator = Validator::make($request->all(), [
             'nama_lengkap' => 'required|string|max:255',
             'NIM' => 'required|string|max:20',
-            'foto' => 'nullable|image|mimes:jpeg,png,jpg,gif|max:2048',
-        ]);
+            'foto' => 'nullable|image|mimes:jpeg,png,jpg,gif|max:4096',
+        ], ['images.*' => 'Each image must not be larger than 4 MB.']);
+
+
+
+        if ($validator->fails()) {
+            return ResponseHelper::send('Check your input', $validator->messages(), 400);
+        }
 
         $user = request()->user();
         if ($user->role != 'admin') {
-            return abort(403);
+            return ResponseHelper::send('Unauthorized', null, 403);
         }
 
         try {
@@ -223,16 +212,9 @@ class MahasiswaController extends Controller
                 'NIM' => $request->NIM,
                 'foto' => $urlFoto, // langsung simpan URL lengkap ke kolom foto
             ]);
-
-            return response()->json([
-                'message' => 'Mahasiswa berhasil ditambahkan!',
-                'data' => $member,
-            ], 201);
+            return ResponseHelper::send('Mahasiswa berhasil ditambahkan!', $member, 201);
         } catch (\Exception $e) {
-            return response()->json([
-                'message' => 'Terjadi kesalahan saat menambahkan mahasiswa',
-                'error' => $e->getMessage(),
-            ], 500);
+            return ResponseHelper::send('Mahasiswa gagal ditambahkan!', $e->getMessage(), 400);
         }
     }
 
@@ -242,15 +224,19 @@ class MahasiswaController extends Controller
     public function updateMahasiswa(Request $request, $id)
     {
         // Validasi input
-        $request->validate([
+        $validator = Validator::make($request->all(), [
             'nama_lengkap' => 'required|string|max:255',
             'NIM' => 'required|string|max:20',
-            'foto' => 'nullable|image|mimes:jpeg,png,jpg,gif|max:2048',
-        ]);
+            'foto' => 'nullable|image|mimes:jpeg,png,jpg,gif|max:4096',
+        ], ['images.*' => 'Each image must not be larger than 4 MB.']);
+
+        if ($validator->fails()) {
+            return ResponseHelper::send('Check your input', $validator->messages(), 400);
+        }
 
         $user = request()->user();
         if ($user->role != 'admin') {
-            return abort(403);
+            return ResponseHelper::send('Unauthorized', null, 403);
         }
 
         try {
@@ -273,16 +259,9 @@ class MahasiswaController extends Controller
             $member->nama_lengkap = $request->nama_lengkap;
             $member->NIM = $request->NIM;
             $member->save();
-
-            return response()->json([
-                'message' => 'Mahasiswa berhasil diperbarui!',
-                'data' => $member,
-            ], 200);
+            return ResponseHelper::send('Mahasiswa berhasil diperbarui', $member, 200);
         } catch (\Exception $e) {
-            return response()->json([
-                'message' => 'Terjadi kesalahan saat memperbarui mahasiswa',
-                'error' => $e->getMessage(),
-            ], 500);
+            return ResponseHelper::send('Mahasiswa gagal diperbarui', $e->getMessage(), 400);
         }
     }
 
@@ -292,16 +271,16 @@ class MahasiswaController extends Controller
     {
         $user = request()->user();
         if ($user->role != 'admin') {
-            return abort(403);
+            return ResponseHelper::send('Unauthorized', null, 403);
         }
         try {
             $member = Member::find($id);
             if (!$member) {
-                return response()->json(['message' => 'Mahasiswa tidak ditemukan!'], 404);
+                return ResponseHelper::send('Mahasiswa tidak ditemukan', null, 404);
             }
 
             if ($member->projects->count() > 0) {
-                return response()->json(['message' => 'Mahasiswa masih punya project!'], 400);
+                return ResponseHelper::send('Mahasiswa masih punya project', null, 400);
             }
 
             // Hapus foto jika ada
@@ -312,12 +291,9 @@ class MahasiswaController extends Controller
             // Hapus mahasiswa dari database
             $member->delete();
 
-            return response()->json(['message' => 'Mahasiswa berhasil dihapus!'], 200);
+            return ResponseHelper::send('Mahasiswa berhasil dihapus', null, 200);
         } catch (\Exception $e) {
-            return response()->json([
-                'message' => 'Terjadi kesalahan saat menghapus mahasiswa',
-                'error' => $e->getMessage(),
-            ], 500);
+            return ResponseHelper::send('Mahasiswa gagal dihapus', $e->getMessage(), 400);
         }
         // Cari mahasiswa berdasarkan ID
     }
