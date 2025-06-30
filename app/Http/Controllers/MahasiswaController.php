@@ -51,7 +51,7 @@ class MahasiswaController extends Controller
         // Validasi input
         $anggotas = [];
         $validator = Validator::make($request->all(), [
-            'nama_tim' => 'required|string|max:255',
+            'nama_tim' => 'required|string|min:1|max:255',
             'member_pm' => 'required|exists:anggotas,id',
             'member_fe' => 'required|exists:anggotas,id',
             'member_be' => 'required|exists:anggotas,id',
@@ -89,7 +89,7 @@ class MahasiswaController extends Controller
         // 1. Validasi Input
         $anggotas = []; // Inisialisasi array untuk anggota yang diperbarui
         $validator = Validator::make($request->all(), [
-            'nama_tim' => 'sometimes|string|max:255|unique:teams,nama_tim,' . $id,
+            'nama_tim' => 'sometimes|string|min:1|max:255|unique:teams,nama_tim,' . $id,
             'member_pm' => 'sometimes|exists:anggotas,id', // 'sometimes' agar opsional untuk update
             'member_fe' => 'sometimes|exists:anggotas,id', // 'sometimes' agar opsional untuk update
             'member_be' => 'sometimes|exists:anggotas,id', // 'sometimes' agar opsional untuk update
