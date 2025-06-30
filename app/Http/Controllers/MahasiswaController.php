@@ -52,7 +52,10 @@ class MahasiswaController extends Controller
         $anggotas = [];
         $validator = Validator::make($request->all(), [
             'nama_tim' => 'required|string|max:255',
-            'member_*' => 'required|exists:anggotas,id',
+            'member_pm' => 'required|exists:anggotas,id',
+            'member_fe' => 'required|exists:anggotas,id',
+            'member_be' => 'required|exists:anggotas,id',
+            'member_ui_ux' => 'required|exists:anggotas,id',
         ]);
 
         $validator->stopOnFirstFailure();
@@ -87,7 +90,10 @@ class MahasiswaController extends Controller
         $anggotas = []; // Inisialisasi array untuk anggota yang diperbarui
         $validator = Validator::make($request->all(), [
             'nama_tim' => 'sometimes|string|max:255|unique:teams,nama_tim,' . $id,
-            'member_*' => 'sometimes|exists:anggotas,id', // 'sometimes' agar opsional untuk update
+            'member_pm' => 'sometimes|exists:anggotas,id', // 'sometimes' agar opsional untuk update
+            'member_fe' => 'sometimes|exists:anggotas,id', // 'sometimes' agar opsional untuk update
+            'member_be' => 'sometimes|exists:anggotas,id', // 'sometimes' agar opsional untuk update
+            'member_ui_ux' => 'sometimes|exists:anggotas,id', // 'sometimes' agar opsional untuk update
         ]);
         $validator->stopOnFirstFailure();
         if ($validator->fails()) {
