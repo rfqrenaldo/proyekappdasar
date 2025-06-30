@@ -178,7 +178,7 @@ class MahasiswaController extends Controller
                 DB::rollBack();
                 return ResponseHelper::send('Tim tidak ditemukan.', null, 404);
             }
-            if ($team->projects->count() > 0) {
+            if ($team->project->count() > 0) {
                 return ResponseHelper::send('Tim masih memiliki project. Silahkan hapus project terlebih dahulu', null, 400);
             }
             $team->delete(); // Ini saja sudah cukup! Database akan menghapus anggota_teams.
