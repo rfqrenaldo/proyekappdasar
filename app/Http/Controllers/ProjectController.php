@@ -108,7 +108,8 @@ class ProjectController extends Controller
             'images.*' => 'image|mimes:jpeg,png,jpg,gif,webp|max:4096',
         ], ['images.*' => 'Each image must not be larger than 4 MB.']);
 
-        if ($validator->stopOnFirstFailure()) {
+        $validator->stopOnFirstFailure();
+        if ($validator->fails()) {
             return ResponseHelper::send(Arr::flatten($validator->messages()->toArray())[0], null, 400);
         }
 
@@ -174,7 +175,8 @@ class ProjectController extends Controller
             'images.*' => 'image|mimes:jpeg,png,jpg,gif,webp|max:4096',
         ], ['foto' => 'Each image must not be larger than 4 MB.']);
 
-        if ($validator->stopOnFirstFailure()) {
+        $validator->stopOnFirstFailure();
+        if ($validator->fails()) {
             return ResponseHelper::send(Arr::flatten($validator->messages()->toArray())[0], null, 400);
         }
 
@@ -265,7 +267,8 @@ class ProjectController extends Controller
             'be' => 'required|exists:anggotas,id',
             'ui_ux' => 'required|exists:anggotas,id',
         ]);
-        if ($validator->stopOnFirstFailure()) {
+        $validator->stopOnFirstFailure();
+        if ($validator->fails()) {
             return ResponseHelper::send(Arr::flatten($validator->messages()->toArray())[0], null, 400);
         }
         $user = request()->user();
@@ -315,7 +318,8 @@ class ProjectController extends Controller
         $validator = Validator::make($request->all(), [
             'comment' => 'required|string|max:255',
         ]);
-        if ($validator->stopOnFirstFailure()) {
+        $validator->stopOnFirstFailure();
+        if ($validator->fails()) {
             return ResponseHelper::send(Arr::flatten($validator->messages()->toArray())[0], null, 400);
         }
 

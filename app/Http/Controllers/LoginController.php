@@ -22,7 +22,8 @@ class LoginController extends Controller
             'password' => 'required',
         ]);
 
-        if ($validator->stopOnFirstFailure()) {
+        $validator->stopOnFirstFailure();
+        if ($validator->fails()) {
             return ResponseHelper::send(Arr::flatten($validator->messages()->toArray())[0], null, 400);
         }
 
@@ -78,7 +79,8 @@ class LoginController extends Controller
             'password' => 'required|string|min:6',
         ]);
 
-        if ($validator->stopOnFirstFailure()) {
+        $validator->stopOnFirstFailure();
+        if ($validator->fails()) {
             return ResponseHelper::send(Arr::flatten($validator->messages()->toArray())[0], null, 400);
         }
 

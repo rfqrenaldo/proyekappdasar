@@ -55,7 +55,8 @@ class MahasiswaController extends Controller
             'member_*' => 'required|exists:anggotas,id',
         ]);
 
-        if ($validator->stopOnFirstFailure()) {
+        $validator->stopOnFirstFailure();
+        if ($validator->fails()) {
             return ResponseHelper::send(Arr::flatten($validator->messages()->toArray())[0], null, 400);
         }
         $user = request()->user();
@@ -88,7 +89,8 @@ class MahasiswaController extends Controller
             'nama_tim' => 'sometimes|string|max:255|unique:teams,nama_tim,' . $id,
             'member_*' => 'sometimes|exists:anggotas,id', // 'sometimes' agar opsional untuk update
         ]);
-        if ($validator->stopOnFirstFailure()) {
+        $validator->stopOnFirstFailure();
+        if ($validator->fails()) {
             return ResponseHelper::send(Arr::flatten($validator->messages()->toArray())[0], null, 400);
         }
 
@@ -190,7 +192,8 @@ class MahasiswaController extends Controller
 
 
 
-        if ($validator->stopOnFirstFailure()) {
+        $validator->stopOnFirstFailure();
+        if ($validator->fails()) {
             return ResponseHelper::send(Arr::flatten($validator->messages()->toArray())[0], null, 400);
         }
 
@@ -231,7 +234,8 @@ class MahasiswaController extends Controller
             'foto' => 'nullable|image|mimes:jpeg,png,jpg,gif|max:4096',
         ], ['images.*' => 'Each image must not be larger than 4 MB.']);
 
-        if ($validator->stopOnFirstFailure()) {
+        $validator->stopOnFirstFailure();
+        if ($validator->fails()) {
             return ResponseHelper::send(Arr::flatten($validator->messages()->toArray())[0], null, 400);
         }
 

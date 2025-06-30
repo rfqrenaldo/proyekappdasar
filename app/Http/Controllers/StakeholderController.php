@@ -46,7 +46,8 @@ class StakeholderController extends Controller
             'foto' => 'nullable|image|mimes:jpeg,png,jpg,gif|max:4096',
         ], ['foto' => 'Each image must not be larger than 4 MB.']);
 
-        if ($validator->stopOnFirstFailure()) {
+        $validator->stopOnFirstFailure();
+        if ($validator->fails()) {
             return ResponseHelper::send(Arr::flatten($validator->messages()->toArray())[0], null, 400);
         }
 
@@ -90,7 +91,8 @@ class StakeholderController extends Controller
             'foto' => 'nullable|image|mimes:jpeg,png,jpg,gif|max:4096',
         ], ['foto' => 'Each image must not be larger than 4 MB.']);
 
-        if ($validator->stopOnFirstFailure()) {
+        $validator->stopOnFirstFailure();
+        if ($validator->fails()) {
             return ResponseHelper::send(Arr::flatten($validator->messages()->toArray())[0], null, 400);
         }
 
