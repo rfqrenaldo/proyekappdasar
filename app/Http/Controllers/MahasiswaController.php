@@ -80,9 +80,14 @@ class MahasiswaController extends Controller
             ]);
             $anggotas[] = $anggota;
         }
-
-        return ResponseHelper::send('Anggota berhasil ditambahkan ke tim!', $anggotas, 201);
+        $data = [
+            "team" => $team,
+            "member" => $anggotas
+        ];
+        return ResponseHelper::send('Anggota berhasil ditambahkan ke tim!', $data, 201);
     }
+
+
 
     public function updateTeamMember(Request $request, $id)
     {
