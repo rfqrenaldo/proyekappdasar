@@ -84,10 +84,10 @@ class StakeholderController extends Controller
     {
         // Validasi input
         $validator = Validator::make($request->all(), [
-            'nama' => 'sometimes|string|max:255',
+            'nama' => 'required|string|max:255',
             'kategori' => 'required|in:Internal,Eksternal',
-            'nomor_telepon' => 'sometimes|digits_between:10,15|max:15',
-            'email' => 'sometimes|email|max:255',
+            'nomor_telepon' => 'required|digits_between:10,15|max:15',
+            'email' => 'required|email|max:255',
             'foto' => 'nullable|image|mimes:jpeg,png,jpg,gif|max:4096',
         ], ['foto' => 'Each image must not be larger than 4 MB.']);
 
