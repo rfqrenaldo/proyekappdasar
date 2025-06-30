@@ -154,7 +154,7 @@ class StakeholderController extends Controller
             // Hapus foto jika ada
 
             if ($stakeholder->projects->count() > 0) {
-                return ResponseHelper::send('Stakeholder masih memiliki project', null, 400);
+                return ResponseHelper::send('Stakeholder masih memiliki project. Silahkan hapus project terlebih dahulu', null, 400);
             }
             if ($stakeholder->foto) {
                 $oldPath = str_replace(asset('storage') . '/', '', $stakeholder->foto);
