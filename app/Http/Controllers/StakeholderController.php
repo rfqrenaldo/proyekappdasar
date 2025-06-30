@@ -152,13 +152,13 @@ class StakeholderController extends Controller
 
         try {
             // Hapus foto jika ada
+
+            if ($stakeholder->projects->count() > 0) {
+                return ResponseHelper::send('Stakeholder masih memiliki project', null, 400);
+            }
             if ($stakeholder->foto) {
                 $oldPath = str_replace(asset('storage') . '/', '', $stakeholder->foto);
                 Storage::disk('public')->delete($oldPath);
-            }
-
-            if ($stakeholder->projects->count() > 0) {
-                throw new \Exception('Stakeholder masih memiliki project');
             }
             // Hapus stakeholder dari database
             $stakeholder->delete();

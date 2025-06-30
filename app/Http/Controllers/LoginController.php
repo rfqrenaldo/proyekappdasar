@@ -62,10 +62,7 @@ class LoginController extends Controller
             ];
             return ResponseHelper::send('Success login', $data, 200);
         } else {
-            return response()->json([
-                'status' => 'false',
-                'messages' => ['Invalid credentials'],
-            ], 401);
+            return ResponseHelper::send('Failed login', null, 401);
         }
     }
 

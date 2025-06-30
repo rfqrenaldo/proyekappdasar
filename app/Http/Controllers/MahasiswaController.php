@@ -309,7 +309,7 @@ class MahasiswaController extends Controller
 
             return ResponseHelper::send('Mahasiswa berhasil dihapus', null, 200);
         } catch (\Exception $e) {
-            return ResponseHelper::send('Mahasiswa gagal dihapus', $e->getMessage(), 400);
+            return ResponseHelper::send($e->getMessage(), null, 400);
         }
         // Cari mahasiswa berdasarkan ID
     }
