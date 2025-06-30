@@ -13,6 +13,7 @@ use App\Models\Team;
 use App\Models\Team_member;
 use App\Models\Year;
 use Illuminate\Http\Request;
+use Illuminate\Support\Arr;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Validator;
 use Log;
@@ -107,8 +108,8 @@ class ProjectController extends Controller
             'images.*' => 'image|mimes:jpeg,png,jpg,gif,webp|max:4096',
         ], ['images.*' => 'Each image must not be larger than 4 MB.']);
 
-        if ($validator->fails()) {
-            return ResponseHelper::send("Check your input", $validator->messages(), 400);
+        if ($validator->stopOnFirstFailure()) {
+            return ResponseHelper::send(Arr::flatten($validator->messages()->toArray())[0], null, 400);
         }
 
         $user = request()->user();
@@ -173,8 +174,8 @@ class ProjectController extends Controller
             'images.*' => 'image|mimes:jpeg,png,jpg,gif,webp|max:4096',
         ], ['foto' => 'Each image must not be larger than 4 MB.']);
 
-        if ($validator->fails()) {
-            return ResponseHelper::send('Check your input', $validator->messages(), 400);
+        if ($validator->stopOnFirstFailure()) {
+            return ResponseHelper::send(Arr::flatten($validator->messages()->toArray())[0], null, 400);
         }
 
         $user = request()->user();
@@ -264,8 +265,8 @@ class ProjectController extends Controller
             'be' => 'required|exists:anggotas,id',
             'ui_ux' => 'required|exists:anggotas,id',
         ]);
-        if ($validator->fails()) {
-            return ResponseHelper::send('Check your input', $validator->messages(), 400);
+        if ($validator->stopOnFirstFailure()) {
+            return ResponseHelper::send(Arr::flatten($validator->messages()->toArray())[0], null, 400);
         }
         $user = request()->user();
         if ($user->role != 'admin') {
@@ -311,12 +312,12 @@ class ProjectController extends Controller
 
     public function commentProject(Request $request, $id)
     {
-        // Validasi input
         $validator = Validator::make($request->all(), [
-            'comment' => 'required|string|max:255',
+            'comment' => 'required|string|min:5',
+            'coba' => 'required|string|min:255',
         ]);
-        if ($validator->fails()) {
-            return ResponseHelper::send('Check your input', $validator->messages(), 400);
+        if ($validator->stopOnFirstFailure()) {
+            return ResponseHelper::send(Arr::flatten($validator->messages()->toArray())[0], null, 400);
         }
 
         // Temukan proyek berdasarkan ID

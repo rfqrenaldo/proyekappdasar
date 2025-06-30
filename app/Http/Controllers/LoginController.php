@@ -10,6 +10,7 @@ use Illuminate\Support\Facades\Auth;
 use App\Models\User;
 use Illuminate\Support\Facades\Validator;
 use Firebase\JWT\JWT;
+use Illuminate\Support\Arr;
 use Response;
 
 class LoginController extends Controller
@@ -21,11 +22,8 @@ class LoginController extends Controller
             'password' => 'required',
         ]);
 
-        if ($validator->fails()) {
-            return response()->json([
-                'status' => 'false',
-                'messages' => $validator->errors(),
-            ], 400);
+        if ($validator->stopOnFirstFailure()) {
+            return ResponseHelper::send(Arr::flatten($validator->messages()->toArray())[0], null, 400);
         }
 
         if (Auth::attempt($request->only('email', 'password'))) {
@@ -80,11 +78,8 @@ class LoginController extends Controller
             'password' => 'required|string|min:6',
         ]);
 
-        if ($validator->fails()) {
-            return response()->json([
-                'status' => 'false',
-                'messages' => $validator->errors(),
-            ], 400);
+        if ($validator->stopOnFirstFailure()) {
+            return ResponseHelper::send(Arr::flatten($validator->messages()->toArray())[0], null, 400);
         }
 
 

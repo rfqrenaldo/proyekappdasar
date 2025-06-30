@@ -9,6 +9,7 @@ use App\Models\Team;
 use App\Models\Team_member;
 use DB;
 use Illuminate\Http\Request;
+use Illuminate\Support\Arr;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Facades\Validator;
 
@@ -54,8 +55,8 @@ class MahasiswaController extends Controller
             'member_*' => 'required|exists:anggotas,id',
         ]);
 
-        if ($validator->fails()) {
-            return ResponseHelper::send('Check your input', $validator->messages(), 400);
+        if ($validator->stopOnFirstFailure()) {
+            return ResponseHelper::send(Arr::flatten($validator->messages()->toArray())[0], null, 400);
         }
         $user = request()->user();
         if ($user->role != 'admin') {
@@ -87,8 +88,8 @@ class MahasiswaController extends Controller
             'nama_tim' => 'sometimes|string|max:255|unique:teams,nama_tim,' . $id,
             'member_*' => 'sometimes|exists:anggotas,id', // 'sometimes' agar opsional untuk update
         ]);
-        if ($validator->fails()) {
-            return ResponseHelper::send('Check your input', $validator->messages(), 400);
+        if ($validator->stopOnFirstFailure()) {
+            return ResponseHelper::send(Arr::flatten($validator->messages()->toArray())[0], null, 400);
         }
 
         // 2. Periksa Hak Akses (Hanya Admin)
@@ -189,8 +190,8 @@ class MahasiswaController extends Controller
 
 
 
-        if ($validator->fails()) {
-            return ResponseHelper::send('Check your input', $validator->messages(), 400);
+        if ($validator->stopOnFirstFailure()) {
+            return ResponseHelper::send(Arr::flatten($validator->messages()->toArray())[0], null, 400);
         }
 
         $user = request()->user();
@@ -230,8 +231,8 @@ class MahasiswaController extends Controller
             'foto' => 'nullable|image|mimes:jpeg,png,jpg,gif|max:4096',
         ], ['images.*' => 'Each image must not be larger than 4 MB.']);
 
-        if ($validator->fails()) {
-            return ResponseHelper::send('Check your input', $validator->messages(), 400);
+        if ($validator->stopOnFirstFailure()) {
+            return ResponseHelper::send(Arr::flatten($validator->messages()->toArray())[0], null, 400);
         }
 
         $user = request()->user();

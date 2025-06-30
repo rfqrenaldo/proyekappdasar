@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Helper\ResponseHelper;
 use App\Models\Stakeholder;
 use Illuminate\Http\Request;
+use Illuminate\Support\Arr;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Storage;
@@ -45,8 +46,8 @@ class StakeholderController extends Controller
             'foto' => 'nullable|image|mimes:jpeg,png,jpg,gif|max:4096',
         ], ['foto' => 'Each image must not be larger than 4 MB.']);
 
-        if ($validator->fails()) {
-            return ResponseHelper::send('Check your input', $validator->messages(), 400);
+        if ($validator->stopOnFirstFailure()) {
+            return ResponseHelper::send(Arr::flatten($validator->messages()->toArray())[0], null, 400);
         }
 
         $user = request()->user();
@@ -89,8 +90,8 @@ class StakeholderController extends Controller
             'foto' => 'nullable|image|mimes:jpeg,png,jpg,gif|max:4096',
         ], ['foto' => 'Each image must not be larger than 4 MB.']);
 
-        if ($validator->fails()) {
-            return ResponseHelper::send('Check your input', $validator->messages(), 400);
+        if ($validator->stopOnFirstFailure()) {
+            return ResponseHelper::send(Arr::flatten($validator->messages()->toArray())[0], null, 400);
         }
 
         $user = request()->user();
