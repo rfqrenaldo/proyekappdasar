@@ -151,7 +151,7 @@ class MahasiswaController extends Controller
 
         // 6. Berikan Respons Sukses
         // Muat ulang anggota tim untuk memastikan data terbaru terkirim dalam respons
-        $updatedTeamMembers = Team_member::where('team_id', $team->id)->get();
+        $updatedTeamMembers = Team_member::with('member')->where('team_id', $team->id)->get();
 
         $data = [
             'team' => $team,
