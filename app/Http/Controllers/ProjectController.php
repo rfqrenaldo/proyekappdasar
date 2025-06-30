@@ -313,8 +313,7 @@ class ProjectController extends Controller
     public function commentProject(Request $request, $id)
     {
         $validator = Validator::make($request->all(), [
-            'comment' => 'required|string|min:5',
-            'coba' => 'required|string|min:255',
+            'comment' => 'required|string|max:255',
         ]);
         if ($validator->stopOnFirstFailure()) {
             return ResponseHelper::send(Arr::flatten($validator->messages()->toArray())[0], null, 400);
